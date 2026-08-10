@@ -27,6 +27,8 @@ should start.
 - [Release checklist / เช็กลิสต์ release](docs/RELEASE-CHECKLIST.md)
 - [Thai API onboarding](docs/integrations/API_ONBOARDING_TH.md)
 - [English API onboarding](docs/integrations/API_ONBOARDING_EN.md)
+- [Thai provider approval form](docs/integrations/PROVIDER-APPROVAL-FORM_TH.md)
+- [English provider approval form](docs/integrations/PROVIDER-APPROVAL-FORM_EN.md)
 - [Integration index](docs/integrations/README.md)
 - [Final release report](u_perfect_final_release_report.md)
 - [Changelog](CHANGELOG.md)

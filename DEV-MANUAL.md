@@ -34,6 +34,7 @@ assets/chatbot/
   sales_response_assets.json      TH/EN intents, objection replies, CTAs
   asset-manifest.json             local media policy and paths
 docs/integrations/                provider onboarding guides
+                                  provider approval workbooks TH/EN
 tests/                            unit, API, integration, PWA, and asset tests
 ```
 
@@ -78,7 +79,7 @@ cp .env.example .env.local  # เก็บนอก Git และไม่ใส
 | POST | `/api/orders/{id}/payment-evidence` | submit evidence to review |
 | POST | `/api/orders/{id}/transition` | guarded order status transition |
 | GET | `/api/integrations` | secret-free provider truth |
-| GET | `/api/integration-guides` | bilingual provider guide links |
+| GET | `/api/integration-guides` | bilingual provider guide and approval-form links |
 | GET | `/api/sales-assets` | validated, secret-free asset pack |
 | GET/PATCH | `/api/settings` | safe workspace preferences |
 | GET | `/api/notifications` | pending/failed LINE outbox events |
@@ -129,6 +130,12 @@ curl http://192.168.74.130:18765/api/health
 curl http://192.168.74.130:18765/api/sales-assets
 curl http://192.168.74.130:18765/api/integration-guides
 ```
+
+The integration guide response contains only public documentation paths. The
+provider approval workbooks at `/guides/PROVIDER-APPROVAL-FORM_TH.md` and
+`/guides/PROVIDER-APPROVAL-FORM_EN.md` are evidence worksheets, not credential
+stores. Keep the local-only normalized webhook boundary separate from any
+future public HTTPS provider adapter.
 
 For a normalized webhook test, use a non-secret test header only in a trusted
 local request and verify the same event twice to prove idempotency.

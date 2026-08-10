@@ -12,6 +12,8 @@
 - [Integration index](integrations/README.md)
 - [Thai provider onboarding](integrations/API_ONBOARDING_TH.md)
 - [English provider onboarding](integrations/API_ONBOARDING_EN.md)
+- [Thai provider approval form](integrations/PROVIDER-APPROVAL-FORM_TH.md)
+- [English provider approval form](integrations/PROVIDER-APPROVAL-FORM_EN.md)
 - [Superpowers design records](superpowers/)
 
 ## English

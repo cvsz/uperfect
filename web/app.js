@@ -122,6 +122,8 @@
     $("#inbox-count").textContent = state.conversations.length;
     const views = { overview: renderOverview, inbox: renderInbox, memory: renderMemory, orders: renderOrders, skills: renderSkills, agents: renderAgents, automations: renderAutomations, integrations: renderIntegrations, "sales-assets": renderSalesAssets, settings: renderSettings };
     (views[state.view] || renderOverview)();
+    if (state.view === "integrations") decorateIntegrationGuideActions();
+    if (state.view === "settings") decorateSettingsProviderActions();
     const view = $("#view");
     view.focus({ preventScroll: true });
   }
@@ -150,7 +152,9 @@
 
   function integrationRow(item) {
     const guide = state.integrationGuides.find((entry) => entry.provider === item.provider);
-    return `<div class="status-row"><div class="status-row-main"><span class="status-dot ${item.status === "unconfigured" ? "is-warn" : ""}"></span><div><strong>${esc(item.label || item.provider)}</strong><small>${esc(item.webhook_path || t("common.serverSide"))}</small>${guide ? `<small>${esc(localized(guide, "th", ""))}</small>` : ""}</div></div>${statusBadge(item.status)}</div>`;
+    const label = state.lang === "th" ? item.label_th : item.label_en;
+    const note = state.lang === "th" ? item.setup_note_th : item.setup_note_en;
+    return `<div class="status-row"><div class="status-row-main"><span class="status-dot ${item.status === "unconfigured" ? "is-warn" : ""}"></span><div><strong>${esc(label || item.label || item.provider)}</strong><small>${esc(item.webhook_path || t("common.serverSide"))}</small>${guide ? `<small>${esc(localized(guide, "th", ""))}</small>` : note ? `<small>${esc(note)}</small>` : ""}</div></div>${statusBadge(item.status)}</div>`;
   }
 
   function productRow(product) {
@@ -199,9 +203,77 @@
     $("#view").innerHTML = `<div class="view-head"><div><h3>n8n Automations</h3><p>${tx("Auto post, comment reply, schedule และ Auto Update อยู่หลัง webhook/account verification", "Auto post, comment reply, scheduling, and Auto Update remain behind webhook/account verification.")}</p></div><div class="view-actions"><button class="button-secondary" data-view-action="integrations">${tx("ตรวจ Channels", "Review channels")}</button></div></div><div class="entity-grid">${state.workflows.map((item) => `<article class="panel"><div class="panel-title"><h4>${esc(localized(item, "name", ""))}</h4>${statusBadge(item.status)}</div><p class="muted small">${esc(localized(item, state.lang === "th" ? "th_note" : "en_note", item.note || ""))}</p><span class="code-line">workflow: ${esc(item.id)}</span></article>`).join("") || empty(t("common.empty"))}</div>`;
   }
 
+  function decorateIntegrationGuideActions() {
+    const grids = document.querySelectorAll("#view .entity-grid");
+    const cards = grids[1]?.querySelectorAll("article.panel") || [];
+    state.integrationGuides.forEach((guide, index) => {
+      const actions = cards[index]?.querySelector(".view-actions");
+      if (!actions || actions.querySelector("[data-approval-form]")) return;
+      [["approval_th", tx("แบบฟอร์ม TH ↗", "TH approval ↗")], ["approval_en", tx("แบบฟอร์ม EN ↗", "EN approval ↗")]].forEach(([field, label]) => {
+        if (!guide[field]) return;
+        const link = document.createElement("a");
+        link.className = "button-secondary";
+        link.dataset.approvalForm = "true";
+        link.target = "_blank";
+        link.rel = "noreferrer";
+        link.href = guide[field];
+        link.textContent = label;
+        actions.appendChild(link);
+      });
+    });
+    const heading = document.querySelector("#view > h3");
+    if (heading) heading.textContent = tx("คู่มือขอ API และแบบฟอร์มอนุมัติ", "API onboarding and approval workbooks");
+    cards.forEach((card) => {
+      const badge = card.querySelector(".status-badge");
+      if (badge) badge.textContent = tx("คู่มือและแบบฟอร์ม", "Guides & form");
+    });
+  }
+
+  function decorateSettingsProviderActions() {
+    const form = $("#settings-form");
+    const anchor = form?.querySelector(".settings-actions");
+    if (!form || !anchor || form.querySelector("[data-provider-docs]")) return;
+    const panel = document.createElement("article");
+    panel.className = "panel";
+    panel.dataset.providerDocs = "true";
+    const title = document.createElement("div");
+    title.className = "panel-title";
+    const heading = document.createElement("h4");
+    heading.textContent = tx("ขอ API และอนุมัติ provider", "Provider API access and approval");
+    const badge = document.createElement("span");
+    badge.className = "status-badge";
+    badge.textContent = tx("เจ้าของบัญชีดำเนินการ", "Owner action required");
+    title.append(heading, badge);
+    const note = document.createElement("p");
+    note.className = "muted small";
+    note.textContent = tx("เปิดคู่มือหรือแบบฟอร์ม TH/EN ได้จากที่นี่ ห้ามใส่ token หรือ secret ใน Dashboard", "Open the TH/EN guides or approval workbook here. Never enter tokens or secrets in the Dashboard.");
+    const actions = document.createElement("div");
+    actions.className = "view-actions";
+    const channels = document.createElement("button");
+    channels.type = "button";
+    channels.className = "button-secondary";
+    channels.dataset.viewAction = "integrations";
+    channels.textContent = tx("ดู Channels", "View Channels");
+    const th = document.createElement("a");
+    th.className = "button-secondary";
+    th.target = "_blank";
+    th.rel = "noreferrer";
+    th.href = "/guides/PROVIDER-APPROVAL-FORM_TH.md";
+    th.textContent = tx("แบบฟอร์ม TH ↗", "TH approval ↗");
+    const en = document.createElement("a");
+    en.className = "button-secondary";
+    en.target = "_blank";
+    en.rel = "noreferrer";
+    en.href = "/guides/PROVIDER-APPROVAL-FORM_EN.md";
+    en.textContent = tx("แบบฟอร์ม EN ↗", "EN approval ↗");
+    actions.append(channels, th, en);
+    panel.append(title, note, actions);
+    anchor.before(panel);
+  }
+
   function renderIntegrations() {
     const guides = state.integrationGuides.map((guide) => `<article class="panel"><div class="panel-title"><h4>${esc(guide.name)}</h4><span class="status-badge">${tx("คู่มือ API", "API guide")}</span></div><p class="muted small">${esc(localized(guide, "th", ""))}</p><div class="view-actions"><a class="button-secondary" href="${esc(guide.guide_th)}" target="_blank" rel="noreferrer">TH ↗</a><a class="button-secondary" href="${esc(guide.guide_en)}" target="_blank" rel="noreferrer">EN ↗</a></div></article>`).join("");
-    $("#view").innerHTML = `<div class="view-head"><div><h3>${tx("Channels และสถานะการเชื่อมต่อ", "Channels & connection truth")}</h3><p>${tx("สถานะจะเปลี่ยนเมื่อ credentials และ verification ถูกตั้งค่าที่ server เท่านั้น", "Status changes only after server-side credentials and verification.")}</p></div><div class="view-actions"><button class="button-secondary" data-view-action="agents">${tx("ดู agents", "View agents")}</button></div></div><div class="entity-grid">${state.integrations.map((item) => `<article class="panel"><div class="panel-title"><h4>${esc(item.label || item.provider)}</h4>${statusBadge(item.status)}</div><p class="muted small">${esc(item.setup_note || tx("ตรวจ setup ที่ server", "Review server-side setup"))}</p><span class="code-line">${esc(item.webhook_path)}</span></article>`).join("")}</div><h3 style="margin:1.25rem 0 .75rem">${tx("คู่มือขอ API", "API onboarding guides")}</h3><div class="entity-grid">${guides || empty(tx("ยังไม่มีคู่มือ", "No guides yet"))}</div><article class="panel" style="margin-top:.85rem"><div class="callout">${tx("Facebook Page: @spookyuperfect · TikTok Shop และ Shopee ต้องผ่าน account-owner setup ก่อนรับส่งข้อความจริง ระบบ local ยังไม่อ้างว่าเชื่อมต่อแล้ว", "Facebook Page: @spookyuperfect. TikTok Shop and Shopee require account-owner setup before real messaging. The local system does not claim they are connected.")}</div></article>`;
+    $("#view").innerHTML = `<div class="view-head"><div><h3>${tx("Channels และสถานะการเชื่อมต่อ", "Channels & connection truth")}</h3><p>${tx("สถานะจะเปลี่ยนเมื่อ credentials และ verification ถูกตั้งค่าที่ server เท่านั้น", "Status changes only after server-side credentials and verification.")}</p></div><div class="view-actions"><button class="button-secondary" data-view-action="agents">${tx("ดู agents", "View agents")}</button></div></div><div class="entity-grid">${state.integrations.map((item) => { const label = state.lang === "th" ? item.label_th : item.label_en; const note = state.lang === "th" ? item.setup_note_th : item.setup_note_en; return `<article class="panel"><div class="panel-title"><h4>${esc(label || item.label || item.provider)}</h4>${statusBadge(item.status)}</div><p class="muted small">${esc(note || item.setup_note || tx("ตรวจ setup ที่ server", "Review server-side setup"))}</p><span class="code-line">${esc(item.webhook_path)}</span></article>`; }).join("")}</div><h3 style="margin:1.25rem 0 .75rem">${tx("คู่มือขอ API", "API onboarding guides")}</h3><div class="entity-grid">${guides || empty(tx("ยังไม่มีคู่มือ", "No guides yet"))}</div><article class="panel" style="margin-top:.85rem"><div class="callout">${tx("Facebook Page: @spookyuperfect · TikTok Shop และ Shopee ต้องผ่าน account-owner setup ก่อนรับส่งข้อความจริง ระบบ local ยังไม่อ้างว่าเชื่อมต่อแล้ว", "Facebook Page: @spookyuperfect. TikTok Shop and Shopee require account-owner setup before real messaging. The local system does not claim they are connected.")}</div></article>`;
   }
 
   function renderSalesAssets() {
@@ -359,7 +431,7 @@
   $("#language-toggle").addEventListener("click", () => { state.lang = state.lang === "th" ? "en" : "th"; localStorage.setItem("uperfect-language", state.lang); render(); });
   $("#mobile-menu").addEventListener("click", () => { $(".sidebar").classList.toggle("is-mobile-open"); });
   window.addEventListener("hashchange", () => { state.view = window.location.hash.slice(1) || "overview"; render(); });
-  if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("/service-worker.js?v=20260810-local-v5").catch(() => {}));
+  if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("/service-worker.js?v=20260810-local-v7").catch(() => {}));
 
   window.UperfectApp = { loadDashboard, setTakeover, submitMessage };
   loadDashboard();

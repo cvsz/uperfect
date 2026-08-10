@@ -19,6 +19,8 @@ connections.
 - [Project documentation map](PROJECT-DOCUMENTATION.md)
 - [Thai API onboarding](docs/integrations/API_ONBOARDING_TH.md)
 - [English API onboarding](docs/integrations/API_ONBOARDING_EN.md)
+- [Thai provider approval form](docs/integrations/PROVIDER-APPROVAL-FORM_TH.md)
+- [English provider approval form](docs/integrations/PROVIDER-APPROVAL-FORM_EN.md)
 - [GitHub workflow and templates](.github/README.md)
 
 ## Run locally
@@ -57,7 +59,8 @@ user unit and enable it with `systemctl --user enable --now uperfect.service`.
 - Sales Assets: validated TH/EN intents, objection replies, closing CTAs, and
   local product media are served from `/api/sales-assets` and `/assets/`.
 - API onboarding: `/api/integration-guides` links the full TH/EN setup guides
-  for Facebook Messenger, TikTok Shop, Shopee, and LINE.
+  and provider approval workbooks for Facebook Messenger, TikTok Shop, Shopee,
+  and LINE.
 - PWA shell: manifest and service worker cache only static shell files; API
   mutations are never cached.
 

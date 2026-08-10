@@ -22,6 +22,9 @@ assignees: ""
 
 <!-- ระบุ route, screenshot หรือ test ที่เกี่ยวข้อง โดยลบ secret -->
 
+ถ้าเกี่ยวกับ provider ให้ตรวจคู่มือ [TH](../../docs/integrations/API_ONBOARDING_TH.md),
+[EN](../../docs/integrations/API_ONBOARDING_EN.md) และแบบฟอร์มอนุมัติที่เกี่ยวข้องก่อนส่ง
+
 ## English
 
 ### Document/view
@@ -37,3 +40,6 @@ assignees: ""
 ### Evidence
 
 <!-- Include route, screenshot, or test references with secrets removed. -->
+
+For provider documentation, check the [Thai](../../docs/integrations/API_ONBOARDING_TH.md),
+[English](../../docs/integrations/API_ONBOARDING_EN.md), and approval workbook documents first.

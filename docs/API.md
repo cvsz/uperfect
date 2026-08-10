@@ -6,14 +6,16 @@
 
 - `GET /api/health` returns `{status, brand}`.
 - `GET /api/dashboard` returns counts and secret-free integration summaries.
-- `GET /api/integrations` returns provider, status, webhook path, and setup note.
+- `GET /api/integrations` returns provider, status, webhook path, and secret-free
+  `label_th`/`label_en` plus `setup_note_th`/`setup_note_en` fields.
 
 ### Product and sales assets
 
 - `GET /api/products?q=...` lists catalog facts.
 - `POST /api/products` saves a validated product payload.
 - `GET /api/sales-assets` returns validated TH/EN response assets and local media metadata.
-- `GET /api/integration-guides` returns provider guide links only.
+- `GET /api/integration-guides` returns provider guide and approval-form links
+  only; it never returns credentials.
 
 ### Conversation
 
@@ -51,9 +53,12 @@ This is not a raw Facebook, TikTok, Shopee, or LINE adapter.
 
 - `GET /api/health`: process and brand health.
 - `GET /api/dashboard`: counts and secret-free integration summaries.
+- `GET /api/integrations`: provider status and bilingual setup notes, without
+  credentials.
 - `GET /api/products`: catalog facts and optional search.
 - `GET /api/sales-assets`: validated bilingual response/media metadata.
-- `GET /api/integration-guides`: TH/EN guide links with no credentials.
+- `GET /api/integration-guides`: TH/EN guide and approval-form links with no
+  credentials.
 - `POST /api/messages`: normalized conversation input and Autobot reply.
 - `POST /api/conversations/{id}/takeover`: pause/resume automation.
 - `POST /api/orders`: create a priced draft order.

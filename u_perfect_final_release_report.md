@@ -51,6 +51,8 @@ is used.
 | `assets/chatbot/asset-manifest.json` | Local product media manifest and asset policy | Validated locally |
 | `docs/integrations/API_ONBOARDING_TH.md` | Full Thai provider setup guide | Documentation |
 | `docs/integrations/API_ONBOARDING_EN.md` | Full English provider setup guide | Documentation |
+| `docs/integrations/PROVIDER-APPROVAL-FORM_TH.md` | Thai owner approval/evidence workbook | Documentation; no secrets |
+| `docs/integrations/PROVIDER-APPROVAL-FORM_EN.md` | English owner approval/evidence workbook | Documentation; no secrets |
 | `USER-MANUAL.md` | Daily user workflow in TH/EN | Documentation |
 | `ADMIN-MANUAL.md` | Owner/admin/provider/review workflow in TH/EN | Documentation |
 | `DEV-MANUAL.md` | Runtime, API, i18n, assets, testing, and release workflow in TH/EN | Documentation |
@@ -88,7 +90,8 @@ keeps unpriced/reference-only products in admin review and includes sensitive-
 skin patch-test guidance.
 
 The runtime endpoints are `GET /api/sales-assets`, `GET /api/integration-guides`,
-`/assets/`, and `/guides/`. These routes expose no credential values.
+`/assets/`, and `/guides/`. These routes expose no credential values. The
+approval workbooks record only non-secret identifiers and redacted evidence.
 
 ## Safety and external gates
 
@@ -105,6 +108,9 @@ The runtime endpoints are `GET /api/sales-assets`, `GET /api/integration-guides`
   deployment-gated workflows, not fabricated live automation.
 - The no-cost local profile does not enable Gemini, LINE inbound, n8n, Facebook,
   TikTok Shop, or Shopee without their official credentials and verification.
+- External provider callbacks cannot target the private LAN host directly; a
+  public HTTPS adapter with provider-specific signature/state validation is a
+  separate deployment gate.
 
 ## Verification record
 

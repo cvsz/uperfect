@@ -38,6 +38,10 @@
 
 <!-- ระบุ account owner, provider approval, migration, env หรือ rollback ที่ยังต้องทำ -->
 
+### Provider approval evidence
+
+- [ ] ถ้าแตะ provider ให้แนบแบบฟอร์ม [TH](../docs/integrations/PROVIDER-APPROVAL-FORM_TH.md) หรือ [EN](../docs/integrations/PROVIDER-APPROVAL-FORM_EN.md) แบบไม่มี secret
+
 ## English
 
 ### Summary
@@ -75,3 +79,7 @@
 ### Deployment gates / remaining work
 
 <!-- Account owner, provider approval, migration, environment, and rollback requirements. -->
+
+### Provider approval evidence
+
+- [ ] If a provider is touched, include the [Thai](../docs/integrations/PROVIDER-APPROVAL-FORM_TH.md) or [English](../docs/integrations/PROVIDER-APPROVAL-FORM_EN.md) workbook with all secrets removed.

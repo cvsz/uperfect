@@ -31,6 +31,8 @@ curl -fsS http://192.168.74.130:18765/api/integrations
 4. ปิด Autobot หรือเปิด human takeover หากมีการตอบผิด
 5. ห้ามแก้ราคา/สต็อก/สถานะ order ด้วยมือใน database โดยไม่ audit
 6. เก็บหลักฐานก่อน restart หรือ rollback
+7. หากเป็น provider ให้ตรวจ approval workbook, callback ownership และสถานะ
+   `configured`/`verified` แยกกันก่อนเปิดใช้
 
 ### Backup/restore
 
@@ -61,7 +63,8 @@ The local-only profile is restricted to `http://192.168.74.130:11434` and
 Record time, URL, and symptoms without credentials. Separate local API, LAN
 route, public route, provider API, and notification outbox. Check health/logs,
 pause automation or enable takeover when replies are unsafe, and preserve
-evidence before restart or rollback.
+evidence before restart or rollback. For provider incidents, review the approval
+workbook and keep `configured` separate from `verified`.
 
 ### Backup/restore
 

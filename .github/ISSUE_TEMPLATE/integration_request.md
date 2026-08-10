@@ -22,6 +22,8 @@ assignees: ""
 - Official portal/app ID (ไม่ใส่ secret):
 - Requested scopes:
 - Sandbox/test shop available:
+- [ ] อ่าน [แบบฟอร์มอนุมัติ TH](../../docs/integrations/PROVIDER-APPROVAL-FORM_TH.md) แล้ว
+- [ ] มี approval/review evidence แบบลบ secretแล้ว หรือระบุว่า pending
 
 ### Callback/webhook
 
@@ -33,6 +35,7 @@ assignees: ""
 ### Gate
 
 ระบุสิ่งที่ยังเป็น `unconfigured` และหลักฐานที่ต้องใช้ก่อน `verified`
+แนบแบบฟอร์มอนุมัติที่กรอกเฉพาะ identifiers/scope/callback และหลักฐานที่ลบ secret แล้ว
 
 ## English
 
@@ -50,6 +53,8 @@ assignees: ""
 - Official portal/app ID (no secrets):
 - Requested scopes:
 - Sandbox/test shop available:
+- [ ] Read the [English approval workbook](../../docs/integrations/PROVIDER-APPROVAL-FORM_EN.md).
+- [ ] Approval/review evidence is redacted, or the pending state is recorded.
 
 ### Callback/webhook
 
@@ -61,3 +66,4 @@ assignees: ""
 ### Gate
 
 Describe what remains `unconfigured` and what evidence is required before `verified`.
+Attach the workbook with identifiers, scopes, callbacks, and redacted evidence only.

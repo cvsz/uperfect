@@ -17,6 +17,12 @@ curl -fsS http://192.168.74.130:18765/api/health
 ไฟล์ unit อยู่ที่ `deploy/systemd/uperfect.service` และต้องตรวจ owner/process
 ก่อน restart ทุกครั้ง
 
+การขอสิทธิ์ Facebook/Meta, TikTok Shop, Shopee และ LINE ให้ใช้คู่มือใน
+`docs/integrations/API_ONBOARDING_TH.md` หรือ `_EN.md` และกรอกแบบฟอร์ม
+`PROVIDER-APPROVAL-FORM_TH.md`/`_EN.md` โดยไม่ใส่ secret ค่าที่ provider ใช้เป็น
+callback/webhook ห้ามชี้ตรงไปที่ `192.168.74.130`; ต้องเป็น public HTTPS adapter
+ที่ตรวจ signature/state ฝั่ง server ก่อนส่ง event เข้า local service
+
 ### Public route
 
 `uperfect.zeaz.dev` เป็น public route ที่จัดการนอก repository นี้ โดย
@@ -61,6 +67,12 @@ curl -fsS http://192.168.74.130:18765/api/health
 
 The unit file is `deploy/systemd/uperfect.service`. Identify the owning unit and
 process before restarting anything.
+
+Use `docs/integrations/API_ONBOARDING_EN.md` and
+`docs/integrations/PROVIDER-APPROVAL-FORM_EN.md` for provider access and owner
+evidence. Provider callbacks/webhooks must not point directly to
+`192.168.74.130`; use a public HTTPS adapter with server-side signature/state
+validation before forwarding events to the local service.
 
 ### Public route
 

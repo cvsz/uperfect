@@ -34,12 +34,15 @@ secret ใด ๆ
 
 1. อ่าน [คู่มือ API ภาษาไทย](docs/integrations/API_ONBOARDING_TH.md) หรือ
    [English API guide](docs/integrations/API_ONBOARDING_EN.md)
-2. ให้ account owner ขอสิทธิ์จาก portal ทางการ
-3. เก็บค่าที่ได้ใน server environment/secret manager
-4. restart service หรือ reload configuration ตาม deployment policy
-5. ตรวจ `/api/integrations` และ dashboard Channels
-6. ทำ provider ping, webhook test, duplicate event test และ message test
-7. เปลี่ยนเป็น production เฉพาะเมื่อมีหลักฐาน `verified`
+2. เปิด [แบบฟอร์มอนุมัติภาษาไทย](docs/integrations/PROVIDER-APPROVAL-FORM_TH.md)
+   หรือ [English approval form](docs/integrations/PROVIDER-APPROVAL-FORM_EN.md)
+   และกรอกเฉพาะ identifiers/scope/หลักฐานที่ลบ secret แล้ว
+3. ให้ account owner ขอสิทธิ์จาก portal ทางการ
+4. เก็บค่าที่ได้ใน server environment/secret manager
+5. restart service หรือ reload configuration ตาม deployment policy
+6. ตรวจ `/api/integrations` และ dashboard Channels
+7. ทำ provider ping, webhook test, duplicate event test และ message test
+8. เปลี่ยนเป็น production เฉพาะเมื่อมีหลักฐาน `verified`
 
 ห้ามคัดลอก credential ใส่หน้า Settings เพื่อให้สถานะเปลี่ยน เพราะ frontend ไม่ใช่
 ที่เก็บ secret และสถานะ `configured` ไม่เท่ากับ `verified`
@@ -145,12 +148,15 @@ or secrets.
 
 1. Read the [Thai API guide](docs/integrations/API_ONBOARDING_TH.md) or the
    [English API guide](docs/integrations/API_ONBOARDING_EN.md).
-2. Have the account owner request access through the official portal.
-3. Store returned values in the server environment or a secret manager.
-4. Restart or reload the service according to deployment policy.
-5. Check `/api/integrations` and the Dashboard Channels view.
-6. Run provider ping, webhook, duplicate-event, and message tests.
-7. Enable production only with `verified` evidence.
+2. Open the [Thai approval form](docs/integrations/PROVIDER-APPROVAL-FORM_TH.md)
+   or [English approval form](docs/integrations/PROVIDER-APPROVAL-FORM_EN.md)
+   and record only identifiers, scopes, and redacted evidence.
+3. Have the account owner request access through the official portal.
+4. Store returned values in the server environment or a secret manager.
+5. Restart or reload the service according to deployment policy.
+6. Check `/api/integrations` and the Dashboard Channels view.
+7. Run provider ping, webhook, duplicate-event, and message tests.
+8. Enable production only with `verified` evidence.
 
 Do not paste credentials into Settings. The frontend is not a secret vault, and
 `configured` is not the same as `verified`.

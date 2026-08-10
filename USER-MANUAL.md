@@ -26,7 +26,7 @@
 - **ออเดอร์:** สร้าง draft order, รับ payment evidence และดูสถานะ review
 - **Skills / Agents:** ตรวจความสามารถและขอบเขตการทำงานที่ server รายงาน
 - **n8n Automations:** ดู workflow ที่ยังต้องผ่าน account/webhook verification
-- **Channels:** ดูสถานะจริงและเปิดคู่มือขอ API TH/EN
+- **Channels:** ดูสถานะจริงและเปิดคู่มือขอ API หรือแบบฟอร์มอนุมัติ TH/EN
 - **Sales Assets:** ดูรูป local, selling points, intent และข้อความ CTA ที่ใช้จริง
 - **ตั้งค่า:** แก้โปรไฟล์ร้าน ภาษา โทน Autobot เวลา takeover และ notification preference
 
@@ -114,7 +114,7 @@ installation does not grant the browser access to store tokens or secrets.
 - **Orders:** create draft orders, receive payment evidence, and review status
 - **Skills / Agents:** server-reported capabilities and operating scope
 - **n8n Automations:** workflows that remain behind account/webhook verification
-- **Channels:** truthful connection status and TH/EN API onboarding guides
+- **Channels:** truthful connection status, TH/EN API onboarding guides, and approval workbooks
 - **Sales Assets:** local media, selling points, intents, and closing CTAs
 - **Settings:** store profile, language, Autobot tone, takeover timeout, and notifications
 

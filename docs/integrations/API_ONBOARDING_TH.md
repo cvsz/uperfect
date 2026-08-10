@@ -10,6 +10,10 @@
 ไม่ถือว่าเชื่อมต่อสำเร็จ และห้ามวาง token, secret หรือ PIN ใน browser, chat,
 Git หรือไฟล์เอกสาร
 
+ใช้ [แบบฟอร์มขอสิทธิ์และอนุมัติ Provider ภาษาไทย](PROVIDER-APPROVAL-FORM_TH.md)
+สำหรับเก็บเฉพาะ identifiers, scope, callback, ผู้อนุมัติ และหลักฐานที่ลบ secret
+แล้ว แบบฟอร์มนี้ไม่ใช่ที่เก็บ credential
+
 ## 1. ภาพรวมขั้นตอนร่วม
 
 1. เจ้าของบัญชีเข้าสู่ portal ทางการด้วยบัญชีธุรกิจของตนเอง
@@ -91,6 +95,9 @@ adapter server-side ก่อนรับ traffic จาก Meta จริง
 ### Portal ทางการ
 
 - สร้างแอปใน Partner Center: <https://partner.tiktokshop.com/docv2/page/create-your-app>
+- OAuth client: <https://partner.tiktokshop.com/docv2/page/create-tts-app-oauth-client>
+- Authorization guide: <https://partner.tiktokshop.com/docv2/page/authorization-guide-202309>
+- Authorization overview/review: <https://partner.tiktokshop.com/docv2/page/authorization-overview-202407>
 - Developer guide: <https://partner.tiktokshop.com/docv2/page/tts-developer-guide>
 - Webhook configuration guide: <https://partner.tiktokshop.com/docv2/page/configuration-guide>
 - Thailand/ROW authorization ให้ตรวจ label และ region ปัจจุบันใน Partner Center
@@ -125,8 +132,14 @@ adapter server-side ก่อนรับ traffic จาก Meta จริง
 ### Token flow ที่ต้องรักษา
 
 - authorization code ใช้ครั้งเดียวและมีอายุสั้น
+- ตาม authorization guide ปัจจุบัน `auth_code` มีอายุ 30 นาทีและใช้ได้ครั้งเดียว
+  ให้ตรวจ portal อีกครั้งเมื่อ policy เปลี่ยน
 - access token ใช้เรียก API ตาม scope
 - refresh token ใช้ขอ access token ใหม่และต้อง rotate/เก็บอย่างปลอดภัย
+- token endpoint ที่เอกสาร TikTok Shop ปัจจุบันระบุคือ
+  `https://auth.tiktok-shops.com/api/v2/token/get` และ refresh endpoint
+  `https://auth.tiktok-shops.com/api/v2/token/refresh`; ให้ตรวจ region/API version
+  ใน portal ก่อนเรียกจริง
 - ห้าม hard-code token ใน source หรือหน้า Settings
 
 ### ค่าที่ map เข้าระบบ
@@ -274,3 +287,18 @@ permission check และ test transaction ก่อนเปลี่ยนส
 - [ ] payment evidence ยังเป็น `pending_review` จนผู้มีอำนาจอนุมัติ
 - [ ] LINE notification outbox มี owner และแผน rotate token
 - [ ] มี rollback/revoke contact และบันทึกเวลาเปิดใช้งาน
+
+## 8. แบบฟอร์มอนุมัติและหลักฐานแบบละเอียด
+
+กรอก [Provider Approval Form ภาษาไทย](PROVIDER-APPROVAL-FORM_TH.md) ให้ครบ
+ทุก provider ที่ต้องการเปิดใช้ โดยเฉพาะ owner, region, app/channel ID, scope,
+exact callback/webhook URL, review/ticket ID, test evidence และผู้รับผิดชอบ
+rollback แบบฟอร์มจะช่วยแยก `configured` (environment ครบ) ออกจาก `verified`
+(มี provider delivery และ server-side verification จริง)
+
+### ข้อจำกัด callback ของ local-only
+
+`192.168.74.130` ใช้สำหรับ local runtime และ normalized test เท่านั้น ผู้ให้บริการ
+ภายนอกไม่ควรเรียก callback/webhook เข้ามาที่ private LAN IP โดยตรง ก่อนเปิดใช้จริง
+ต้องมี public HTTPS adapter ที่ตรวจ provider signature, OAuth state/nonce,
+timestamp, retry และ duplicate event แล้วจึงค่อยเชื่อมเข้าระบบภายใน

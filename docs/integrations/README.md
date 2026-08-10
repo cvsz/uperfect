@@ -10,6 +10,8 @@ Messenger, TikTok Shop, Shopee และ LINE Messaging API
 
 - [ภาษาไทย](API_ONBOARDING_TH.md)
 - [English](API_ONBOARDING_EN.md)
+- [แบบฟอร์มอนุมัติภาษาไทย](PROVIDER-APPROVAL-FORM_TH.md)
+- [English approval form](PROVIDER-APPROVAL-FORM_EN.md)
 
 ## Current release boundary / ขอบเขตของ release ปัจจุบัน
 
@@ -20,6 +22,9 @@ provider-specific webhook signature validation in the browser.
 Dashboard สามารถแสดงสถานะ provider ลิงก์คู่มือ และช่องกรอกค่าตั้งค่าแบบไม่เปิดเผย
 secret ได้ แต่ยังไม่ทำ OAuth, token exchange, payment verification หรือการตรวจ
 ลายเซ็น webhook เฉพาะ provider ใน browser
+
+เจ้าของบัญชีใช้แบบฟอร์มอนุมัติเพื่อเก็บ identifiers, scopes, callback/webhook,
+review evidence และ sign-off โดยไม่เก็บ credential
 
 All provider statuses remain `unconfigured` until the account owner completes
 the official portal setup and the server-side verification gate. LINE is an
@@ -48,3 +53,7 @@ normalizes the event.
 `X-UPerfect-Webhook-Verified: true` จากฝั่ง server test เท่านั้น ห้ามส่ง raw
 payload ของ provider เข้า route นี้จนกว่าจะมี adapter ที่ตรวจลายเซ็นและแปลง
 event เป็นรูปแบบกลางเรียบร้อยแล้ว
+
+External provider callbacks cannot target `192.168.74.130` directly. A public
+HTTPS adapter and server-side signature validation are required before live
+provider traffic is enabled.

@@ -79,6 +79,52 @@ class WorkspaceSettingsPayload(BaseModel):
 router = APIRouter(prefix="/api")
 
 
+INTEGRATION_COPY = {
+    "facebook": {
+        "label_th": "Facebook",
+        "label_en": "Facebook",
+        "setup_note_th": "ตั้งค่าบัญชีและตรวจสอบ webhook ที่ฝั่ง server ก่อนใช้งาน",
+        "setup_note_en": "Configure the account and verify the webhook server-side before use.",
+    },
+    "tiktok": {
+        "label_th": "TikTok Shop",
+        "label_en": "TikTok Shop",
+        "setup_note_th": "ตั้งค่า Partner Center และตรวจสอบ webhook ที่ฝั่ง server ก่อนใช้งาน",
+        "setup_note_en": "Configure Partner Center and verify the webhook server-side before use.",
+    },
+    "shopee": {
+        "label_th": "Shopee",
+        "label_en": "Shopee",
+        "setup_note_th": "ตั้งค่า Open Platform และตรวจสอบ signature ที่ฝั่ง server ก่อนใช้งาน",
+        "setup_note_en": "Configure Open Platform and verify signatures server-side before use.",
+    },
+    "line": {
+        "label_th": "LINE",
+        "label_en": "LINE",
+        "setup_note_th": "ตั้งค่า channel ฝั่ง server; release นี้ใช้เป็น notification outbox",
+        "setup_note_en": "Configure the channel server-side; this release uses the notification outbox.",
+    },
+    "n8n": {
+        "label_th": "n8n",
+        "label_en": "n8n",
+        "setup_note_th": "ตั้งค่า workflow และตรวจ webhook ที่ฝั่ง server ก่อนใช้งาน",
+        "setup_note_en": "Configure the workflow and verify its webhook server-side before use.",
+    },
+    "gemini": {
+        "label_th": "Gemini",
+        "label_en": "Gemini",
+        "setup_note_th": "ยังไม่เปิดใช้ใน local-only release",
+        "setup_note_en": "Not enabled in the local-only release.",
+    },
+    "local_ai": {
+        "label_th": "Ollama local AI",
+        "label_en": "Ollama local AI",
+        "setup_note_th": "ใช้ Ollama บน 192.168.74.130 โดยไม่ส่งข้อมูลออกนอกเครื่อง",
+        "setup_note_en": "Uses Ollama on 192.168.74.130 without sending data outside the LAN.",
+    },
+}
+
+
 def _services(request: Request):
     return request.app.state.services
 
@@ -273,6 +319,7 @@ def integrations(request: Request) -> dict[str, Any]:
             {
                 "provider": item.provider,
                 "label": item.label,
+                **INTEGRATION_COPY.get(item.provider, {}),
                 "status": item.status,
                 "webhook_path": item.webhook_path,
                 "setup_note": item.setup_note,
@@ -302,6 +349,8 @@ def integration_guides() -> dict[str, Any]:
                 "en": "Create the Meta app, Page access token, and verify the Messenger webhook.",
                 "guide_th": "/guides/API_ONBOARDING_TH.md#facebook-messenger-meta",
                 "guide_en": "/guides/API_ONBOARDING_EN.md#facebook-messenger-meta",
+                "approval_th": "/guides/PROVIDER-APPROVAL-FORM_TH.md#facebook-messenger-meta",
+                "approval_en": "/guides/PROVIDER-APPROVAL-FORM_EN.md#facebook-messenger-meta",
             },
             {
                 "provider": "tiktok",
@@ -310,6 +359,8 @@ def integration_guides() -> dict[str, Any]:
                 "en": "Create a Partner Center app, authorize the shop, and configure an HTTPS webhook.",
                 "guide_th": "/guides/API_ONBOARDING_TH.md#tiktok-shop-open-platform",
                 "guide_en": "/guides/API_ONBOARDING_EN.md#tiktok-shop-open-platform",
+                "approval_th": "/guides/PROVIDER-APPROVAL-FORM_TH.md#tiktok-shop-open-platform",
+                "approval_en": "/guides/PROVIDER-APPROVAL-FORM_EN.md#tiktok-shop-open-platform",
             },
             {
                 "provider": "shopee",
@@ -318,6 +369,8 @@ def integration_guides() -> dict[str, Any]:
                 "en": "Create the Open Platform app, authorize the shop, and keep Partner ID/Key server-side.",
                 "guide_th": "/guides/API_ONBOARDING_TH.md#shopee-open-platform",
                 "guide_en": "/guides/API_ONBOARDING_EN.md#shopee-open-platform",
+                "approval_th": "/guides/PROVIDER-APPROVAL-FORM_TH.md#shopee-open-platform",
+                "approval_en": "/guides/PROVIDER-APPROVAL-FORM_EN.md#shopee-open-platform",
             },
             {
                 "provider": "line",
@@ -326,6 +379,8 @@ def integration_guides() -> dict[str, Any]:
                 "en": "Create a Messaging API channel, issue a channel access token, and configure a webhook for the enabled scope.",
                 "guide_th": "/guides/API_ONBOARDING_TH.md#line-messaging-api",
                 "guide_en": "/guides/API_ONBOARDING_EN.md#line-messaging-api",
+                "approval_th": "/guides/PROVIDER-APPROVAL-FORM_TH.md#line-messaging-api",
+                "approval_en": "/guides/PROVIDER-APPROVAL-FORM_EN.md#line-messaging-api",
             },
         ]
     }

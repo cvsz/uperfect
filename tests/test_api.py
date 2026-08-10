@@ -40,6 +40,9 @@ def test_products_and_integrations_are_listed_without_secrets(client):
     assert integrations.status_code == 200
     assert {item["status"] for item in integrations.json()["items"]} == {"unconfigured"}
     assert "token" not in integrations.text.casefold()
+    facebook = next(item for item in integrations.json()["items"] if item["provider"] == "facebook")
+    assert facebook["label_th"] == "Facebook"
+    assert facebook["setup_note_en"].startswith("Configure the account")
 
 
 def test_sales_assets_and_integration_guides_are_publicly_described_without_secrets(client):
@@ -62,6 +65,13 @@ def test_sales_assets_and_integration_guides_are_publicly_described_without_secr
         "line",
     }
     assert "API_ONBOARDING_TH.md" in guides.text
+    for item in guides.json()["items"]:
+        assert item["guide_th"].startswith("/guides/API_ONBOARDING_TH.md#")
+        assert item["guide_en"].startswith("/guides/API_ONBOARDING_EN.md#")
+        assert item["approval_th"].startswith("/guides/PROVIDER-APPROVAL-FORM_TH.md#")
+        assert item["approval_en"].startswith("/guides/PROVIDER-APPROVAL-FORM_EN.md#")
+        assert client.get(item["approval_th"].split("#", 1)[0]).status_code == 200
+        assert client.get(item["approval_en"].split("#", 1)[0]).status_code == 200
 
 
 def test_product_asset_manifest_is_served_from_local_assets(client):
@@ -166,13 +176,15 @@ def test_dashboard_shell_is_served(client):
     assert "U.Perfect Social Commerce OS" in response.text
     assert 'rel="manifest"' in response.text
     assert 'data-view="sales-assets"' in response.text
-    assert "20260810-local-v6" in response.text
+    assert "20260810-local-v7" in response.text
 
 
 def test_project_manuals_and_provider_guides_are_present(client):
     for path in (
         "/guides/API_ONBOARDING_TH.md",
         "/guides/API_ONBOARDING_EN.md",
+        "/guides/PROVIDER-APPROVAL-FORM_TH.md",
+        "/guides/PROVIDER-APPROVAL-FORM_EN.md",
     ):
         response = client.get(path)
         assert response.status_code == 200

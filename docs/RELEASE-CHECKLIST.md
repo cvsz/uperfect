@@ -14,6 +14,7 @@
 
 - [ ] เปิดทุก view ได้บน desktop และ mobile
 - [ ] TH/EN เปลี่ยน navigation, title, status, forms, Sales Assets และ API guides
+- [ ] Channels และ Settings เปิดลิงก์คู่มือ/แบบฟอร์มอนุมัติ TH/EN ได้ครบ
 - [ ] รูป local โหลดได้และไม่มี external media ที่ไม่ได้อนุมัติ
 - [ ] service worker version ถูก bump หลัง shell change
 
@@ -29,7 +30,9 @@
 ### Provider and deployment
 
 - [ ] account owner อนุมัติ scope
+- [ ] กรอก [Provider Approval Form](integrations/PROVIDER-APPROVAL-FORM_TH.md) โดยไม่มี secret
 - [ ] webhook signature/state validation อยู่ server-side
+- [ ] external callback ไม่ชี้ไปที่ private LAN IP และมี public HTTPS adapter
 - [ ] provider duplicate/rate-limit/retry test ผ่าน
 - [ ] local AI ตรวจ `192.168.74.130:11434` และ model ที่ระบุ
 - [ ] public route และ LAN route ตรวจแยกกัน
@@ -46,6 +49,7 @@
 
 - [ ] Every view works on desktop and mobile.
 - [ ] TH/EN changes navigation, title, status, forms, Sales Assets, and guide links.
+- [ ] Channels and Settings expose the TH/EN setup guides and approval workbooks.
 - [ ] Local images load without unapproved external media.
 - [ ] Service-worker shell version is bumped after shell changes.
 
@@ -61,7 +65,9 @@
 ### Provider and deployment
 
 - [ ] The account owner approved scopes.
+- [ ] Complete the [Provider Approval Form](integrations/PROVIDER-APPROVAL-FORM_EN.md) without secrets.
 - [ ] Signature/state validation runs server-side.
+- [ ] External callbacks use a public HTTPS adapter, never a private LAN IP.
 - [ ] Duplicate, rate-limit, and retry tests have evidence.
 - [ ] Local AI is checked at `192.168.74.130:11434`.
 - [ ] LAN and public routes are verified separately.

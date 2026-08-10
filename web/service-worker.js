@@ -1,10 +1,10 @@
-const CACHE_NAME = "uperfect-shell-v6-local";
+const CACHE_NAME = "uperfect-shell-v7-local";
 const SHELL = [
-  "/?v=20260810-local-v6",
-  "/styles.css?v=20260810-local-v6",
-  "/app.js?v=20260810-local-v6",
+  "/?v=20260810-local-v7",
+  "/styles.css?v=20260810-local-v7",
+  "/app.js?v=20260810-local-v7",
   "/manifest.webmanifest",
-  "/favicon.svg?v=20260810-local-v6"
+  "/favicon.svg?v=20260810-local-v7"
 ];
 
 self.addEventListener("install", (event) => {

@@ -10,6 +10,10 @@ configure the server side of U.Perfect safely. A field in the Dashboard does
 not prove a live connection. Never put tokens, secrets, PINs, or passphrases in
 the browser, chat, Git, screenshots, or documentation.
 
+Use the [Provider Access and Approval Form](PROVIDER-APPROVAL-FORM_EN.md) to
+record only identifiers, scopes, callbacks, owners, and redacted evidence. The
+form is not a credential store.
+
 ## 1. Common onboarding flow
 
 1. The account owner signs in to the official provider portal.
@@ -93,6 +97,9 @@ accepting real Meta traffic.
 ### Official portals
 
 - Create an app in Partner Center: <https://partner.tiktokshop.com/docv2/page/create-your-app>
+- OAuth client: <https://partner.tiktokshop.com/docv2/page/create-tts-app-oauth-client>
+- Authorization guide: <https://partner.tiktokshop.com/docv2/page/authorization-guide-202309>
+- Authorization overview/review: <https://partner.tiktokshop.com/docv2/page/authorization-overview-202407>
 - Developer guide: <https://partner.tiktokshop.com/docv2/page/tts-developer-guide>
 - Webhook configuration: <https://partner.tiktokshop.com/docv2/page/configuration-guide>
 - Check the current Partner Center region/authorization label for Thailand/ROW.
@@ -129,10 +136,15 @@ accepting real Meta traffic.
 
 ### Token flow to preserve
 
-- The authorization code is short-lived and single-use.
+- The current authorization guide documents a 30-minute, single-use
+  authorization code; re-check the portal if that policy changes.
 - The access token is scoped to the approved API calls.
 - The refresh token is used to obtain a new access token and must be rotated
   and stored securely.
+- The current TikTok Shop documentation lists
+  `https://auth.tiktok-shops.com/api/v2/token/get` and
+  `https://auth.tiktok-shops.com/api/v2/token/refresh`; confirm the market/API
+  version in Partner Center before calling them.
 - Never hard-code a token in source code or the Settings page.
 
 ### U.Perfect mapping
@@ -286,3 +298,20 @@ and test transaction are required before a provider should be considered
 - [ ] Payment evidence stays `pending_review` until an authorized reviewer acts.
 - [ ] LINE outbox has an owner and token rotation plan.
 - [ ] Rollback/revocation contacts and the activation timestamp are recorded.
+
+## 8. Detailed approval workbook
+
+Complete the [Provider Access and Approval Form](PROVIDER-APPROVAL-FORM_EN.md)
+for every provider to be enabled. Record the owner, region, app/channel ID,
+scope list, exact callback/webhook URLs, review/ticket evidence, test evidence,
+and rollback owner. The workbook deliberately separates `configured` (the
+environment is complete) from `verified` (provider delivery and server-side
+verification are evidenced).
+
+### Local-only callback boundary
+
+`192.168.74.130` is the local runtime and normalized test host. An external
+provider must not call a private LAN IP directly. Before production enablement,
+provide a public HTTPS adapter that validates provider signatures, OAuth
+state/nonce, timestamps, retries, and duplicate events before forwarding into
+the internal system.

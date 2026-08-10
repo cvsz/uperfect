@@ -8,6 +8,8 @@
 - local product asset manifest and `/api/sales-assets`
 - bilingual provider onboarding for Facebook, TikTok Shop, Shopee, and LINE
 - `/api/integration-guides` and Dashboard guide links
+- bilingual provider approval workbooks for Facebook/Meta, TikTok Shop, Shopee,
+  and LINE with secret-free owner sign-off fields
 - Dashboard `Sales Assets` view with local media and closing CTAs
 - Dashboard-wide TH/EN rendering for navigation, status, forms, and operational views
 - `USER-MANUAL.md`, `ADMIN-MANUAL.md`, `DEV-MANUAL.md`, project docs, and GitHub templates
