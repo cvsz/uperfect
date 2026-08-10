@@ -22,7 +22,7 @@
 | Area | Create | Modify or move |
 | --- | --- | --- |
 | Tests | tests/test_notifications.py, tests/test_settings.py, tests/test_schemas.py, tests/test_repositories.py, tests/test_asset_manifest.py, tests/test_ci_and_deploy.py | Production code only if a behavior test exposes a defect |
-| Assets | assets/loe_soap/LOE_Charcoal_Mud_Soap_TH.md, assets/loe_soap/LOE_Charcoal_Mud_Soap_EN.md | Move the Mala directory and existing soap reference image |
+| Assets | assets/loe_soap/LOE_Charcoal_Mud_Soap_TH.md, assets/loe_soap/LOE_Charcoal_Mud_Soap_EN.md | Move every manifest-referenced product directory to canonical ASCII names |
 | Catalog | None | assets/chatbot/asset-manifest.json, docs/ASSET-CATALOG.md, sales_response_assets.json only when synchronization is necessary |
 | CI | .github/workflows/ci.yml | .github/README.md and README.md |
 | Deployment | deploy/Dockerfile, deploy/docker-compose.yml, deploy/nginx/uperfect.conf.example, deploy/README.md | docs/DEPLOYMENT.md, PROJECT-DOCUMENTATION.md, final report, CHANGELOG.md |
@@ -127,7 +127,10 @@
 - Create: assets/loe_soap/LOE_Charcoal_Mud_Soap_EN.md
 - Create: tests/test_asset_manifest.py
 - Move: assets/น้ำพริกเสือร้องไห้/ to assets/suea_rong_hai_mala_chili_oil/
-- Move: the existing 707931534_10164994697921122_6943873879144250715_n.jpg to assets/loe_soap/
+- Move: assets/VIT C AURA SERUM/ to assets/loe_vit_c_aura_serum/
+- Move: assets/VIT C AURA BODY SERUM/ to assets/loe_vit_c_aura_body_serum/
+- Move: assets/the copper/ to assets/the_copper/
+- Move: the existing 707931534_10164994697921122_6595834135060529509_n.jpg to assets/loe_soap/
 - Modify: assets/chatbot/asset-manifest.json and docs/ASSET-CATALOG.md
 
 **Interfaces:**
@@ -136,14 +139,18 @@
 
 - [ ] Step 1: Write a manifest test asserting a Mala path starts with
   assets/suea_rong_hai_mala_chili_oil/, a soap path starts with assets/loe_soap/,
-  no path contains the old Thai directory, and every manifest path exists.
+  no path contains the old Thai directory or a non-ASCII/space-containing
+  product directory, and every manifest path exists.
 - [ ] Step 2: Run .venv/bin/python -m pytest -q tests/test_asset_manifest.py.
   Confirm it fails before the move because current paths use the Thai directory
   and the soap image is stored under the serum directory.
 - [ ] Step 3: Move existing files without changing bytes:
-  mkdir -p assets/loe_soap assets/suea_rong_hai_mala_chili_oil
-  git mv assets/น้ำพริกเสือร้องไห้/* assets/suea_rong_hai_mala_chili_oil/
-  git mv assets/VIT\ C\ AURA\ SERUM/707931534_10164994697921122_6943873879144250715_n.jpg assets/loe_soap/
+  mkdir -p assets/loe_soap
+  git mv assets/น้ำพริกเสือร้องไห้ assets/suea_rong_hai_mala_chili_oil
+  git mv assets/VIT\ C\ AURA\ SERUM assets/loe_vit_c_aura_serum
+  git mv assets/VIT\ C\ AURA\ BODY\ SERUM assets/loe_vit_c_aura_body_serum
+  git mv assets/the\ copper assets/the_copper
+  git mv assets/loe_vit_c_aura_serum/707931534_10164994697921122_6595834135060529509_n.jpg assets/loe_soap/
 - [ ] Step 4: Add bilingual reference-only soap docs. State that price,
   stock, and final product claims require merchant confirmation.
 - [ ] Step 5: Replace moved manifest paths while keeping asset IDs stable.

@@ -5,6 +5,18 @@
 `assets/chatbot/asset-manifest.json` เป็นบัญชี media local และ
 `assets/chatbot/sales_response_assets.json` เป็นข้อความ TH/EN ของ Autobot
 
+### Canonical asset directories
+
+- `assets/loe_vit_c_aura_serum/` และ `assets/loe_vit_c_aura_body_serum/` เก็บ
+  media ของ Loe VIT C ตาม source ที่มีอยู่
+- `assets/loe_soap/` เก็บภาพอ้างอิงและเอกสาร TH/EN ของ `LOE_CHARCOAL_SOAP`
+- `assets/suea_rong_hai_mala_chili_oil/` เก็บภาพและเอกสาร TH/EN ของ
+  `MALA_CHILI_OIL`
+- `assets/choe/` และ `assets/the_copper/` เก็บ media อ้างอิงของสินค้าที่เหลือ
+
+ทุก path ใน manifest ต้องชี้ไปยังไฟล์ local ที่มีอยู่จริงและต้องไม่ใช้ชื่อ
+โฟลเดอร์เดิมที่เป็นชื่อภาษาไทยหรือ path ที่มีช่องว่างเปล่า
+
 ### สินค้าหลัก
 
 | Product ID | สถานะ | ราคา | การปิดการขาย |
@@ -27,6 +39,20 @@
 
 `asset-manifest.json` indexes local media. `sales_response_assets.json` contains
 the bilingual Autobot intents, objections, selling points, and closing CTAs.
+
+### Canonical asset directories
+
+- `assets/loe_vit_c_aura_serum/` and `assets/loe_vit_c_aura_body_serum/` contain
+  the available Loe VIT C source media.
+- `assets/loe_soap/` contains the TH/EN reference documents and image for
+  `LOE_CHARCOAL_SOAP`.
+- `assets/suea_rong_hai_mala_chili_oil/` contains the TH/EN documents and
+  images for `MALA_CHILI_OIL`.
+- `assets/choe/` and `assets/the_copper/` contain reference media for the other
+  products.
+
+Every manifest path must resolve to an existing local file. The manifest must
+not use the former Thai directory name or a blank-space directory.
 
 | Product ID | State | Price | Closing behavior |
 | --- | --- | --- | --- |

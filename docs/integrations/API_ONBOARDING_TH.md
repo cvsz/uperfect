@@ -224,6 +224,26 @@ U.Perfect มี retryable notification outbox สำหรับแจ้งเ
 ควรนำ `LINE_CHANNEL_ACCESS_TOKEN` ไปใช้ตอบแชทลูกค้าโดยอัตโนมัติจนกว่าจะเพิ่ม
 adapter พร้อมตรวจลายเซ็น webhook
 
+### หมายเหตุ compatibility จาก LINE Developers เดือนกรกฎาคม 2026
+
+ตรวจสอบเมื่อวันที่ 2026-08-10 จาก [ดัชนีข่าว LINE Developers เดือนกรกฎาคม 2026](https://developers.line.biz/en/news/2026/07):
+
+- [LIFF v2.29.2 (2026-07-31)](https://developers.line.biz/en/news/2026/07/31/release-liff-2-29-2/)
+  ออก release โดยไม่มี feature change ที่ต้องปรับใช้ U.Perfect ยังไม่ได้ใช้
+  LIFF ใน release นี้ จึงไม่ต้องเปลี่ยน runtime configuration
+- [Rich menu statistics (2026-07-01)](https://developers.line.biz/en/news/2026/07/01/rich-menu-insight/)
+  และ [การปรับปรุงค่าบริการ LINE MINI App in-app purchase](https://developers.line.biz/en/news/2026/07/01/iap-service-fees/)
+  อยู่นอกขอบเขตปัจจุบัน U.Perfect ยังไม่มี rich-menu analytics, LINE MINI App
+  หรือ LINE in-app purchase integration ใน release นี้
+- [เหตุขัดข้อง LINE Platform วันที่ 2026-07-28](https://developers.line.biz/en/news/2026/07/28/messaging-api-outage/)
+  ได้รับการแก้ไขแล้ว หากเพิ่ม LINE sender ในอนาคตต้องรักษา idempotency ของ
+  outbox และใช้ `X-Line-Retry-Key` ตามเอกสาร LINE เมื่อเป็น 5xx/timeout ที่
+  endpoint รองรับ ห้าม retry แบบส่งข้อความซ้ำโดยไม่ควบคุม
+
+หมายเหตุนี้เป็นแนวทาง compatibility ไม่ใช่หลักฐานว่า LINE account ตั้งค่าแล้ว
+หรือผ่านการ verify แล้ว ให้ตรวจดัชนีข่าวและ API reference ทางการอีกครั้งก่อนเปิด
+ใช้ผลิตภัณฑ์หรือ transport ใหม่ของ LINE
+
 ### ขั้นตอนสำหรับ outbound notification
 
 1. สร้าง Messaging API channel ใน LINE Developers Console

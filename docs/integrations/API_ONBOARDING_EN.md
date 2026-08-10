@@ -235,6 +235,26 @@ to LINE. It does not currently expose an inbound LINE chatbot route. Do not use
 `LINE_CHANNEL_ACCESS_TOKEN` for automated customer replies until a LINE adapter
 with webhook signature validation is implemented.
 
+### LINE Developers July 2026 compatibility note
+
+Reviewed on 2026-08-10 against the [LINE Developers July 2026 news index](https://developers.line.biz/en/news/2026/07):
+
+- [LIFF v2.29.2 (2026-07-31)](https://developers.line.biz/en/news/2026/07/31/release-liff-2-29-2/)
+  was released without feature changes. U.Perfect does not use LIFF in this
+  release, so no runtime configuration changes are required.
+- [Rich menu statistics (2026-07-01)](https://developers.line.biz/en/news/2026/07/01/rich-menu-insight/)
+  and [LINE MINI App in-app purchase updates](https://developers.line.biz/en/news/2026/07/01/iap-service-fees/)
+  are outside the current product scope. U.Perfect has no rich-menu analytics,
+  LINE MINI App, or LINE in-app purchase integration in this release.
+- The [2026-07-28 LINE Platform incident](https://developers.line.biz/en/news/2026/07/28/messaging-api-outage/)
+  was resolved. A future LINE sender must retain outbox idempotency and apply
+  LINE's documented `X-Line-Retry-Key` handling for retryable 5xx/timeouts where
+  the endpoint supports it; it must not blindly duplicate customer messages.
+
+These notes are compatibility guidance, not evidence that a LINE account is
+configured or verified. Re-check the official news index and API reference
+before enabling a new LINE product or transport.
+
 ### Outbound notification steps
 
 1. Create a Messaging API channel in LINE Developers Console.

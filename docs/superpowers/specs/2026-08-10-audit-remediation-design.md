@@ -29,7 +29,8 @@ preserving U.Perfect's local-only, fact-bound runtime contract.
 1. Preserve existing public service interfaces and SQLite behavior.
 2. Test behavior through real repository/service objects and the existing test
    fixtures; use mocks only for the notification transport boundary.
-3. Normalize paths to ASCII, lowercase, underscore-separated directory names.
+3. Normalize all manifest product paths to ASCII, lowercase,
+   underscore-separated directory names.
 4. Do not invent prices, stock, shipping, product efficacy, provider approval,
    or credential values.
 5. Keep provider integrations unconfigured until an account owner supplies
@@ -60,10 +61,13 @@ real defect.
 
 ### Canonical assets
 
-Rename:
+Rename all product directories referenced by the manifest:
 
 - `assets/น้ำพริกเสือร้องไห้/` to
   `assets/suea_rong_hai_mala_chili_oil/`.
+- `assets/VIT C AURA SERUM/` to `assets/loe_vit_c_aura_serum/`.
+- `assets/VIT C AURA BODY SERUM/` to `assets/loe_vit_c_aura_body_serum/`.
+- `assets/the copper/` to `assets/the_copper/`.
 
 Move and add:
 
@@ -76,7 +80,8 @@ Move and add:
 
 Update:
 
-- `assets/chatbot/asset-manifest.json` to use the canonical paths.
+- `assets/chatbot/asset-manifest.json` to use the canonical paths and reject
+  spaces or non-ASCII product directory names.
 - `assets/chatbot/sales_response_assets.json` if any product asset path or
   asset identifier needs synchronization.
 - `docs/ASSET-CATALOG.md` with canonical directories, Mala documentation, and
