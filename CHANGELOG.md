@@ -13,6 +13,10 @@
 - Dashboard `Sales Assets` view with local media and closing CTAs
 - Dashboard-wide TH/EN rendering for navigation, status, forms, and operational views
 - `USER-MANUAL.md`, `ADMIN-MANUAL.md`, `DEV-MANUAL.md`, project docs, and GitHub templates
+- canonical ASCII product asset directories, bilingual soap references, and
+  manifest path tests
+- GitHub Actions CI plus non-root Docker, local-only Compose, and Nginx templates
+- LINE Developers July 2026 compatibility note in the TH/EN onboarding guides
 
 ### Safety / ความปลอดภัย
 

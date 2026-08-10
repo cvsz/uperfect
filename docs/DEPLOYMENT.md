@@ -17,6 +17,11 @@ curl -fsS http://192.168.74.130:18765/api/health
 ไฟล์ unit อยู่ที่ `deploy/systemd/uperfect.service` และต้องตรวจ owner/process
 ก่อน restart ทุกครั้ง
 
+แม่แบบเพิ่มเติมอยู่ที่ `deploy/README.md`, `deploy/Dockerfile`,
+`deploy/docker-compose.yml` และ `deploy/nginx/uperfect.conf.example` โดย Compose
+และ Nginx เป็นทางเลือก ไม่ได้เปลี่ยน owner ของ runtime ที่ใช้อยู่ และต้องตรวจ
+พอร์ต `192.168.74.130:18765` ก่อนใช้
+
 การขอสิทธิ์ Facebook/Meta, TikTok Shop, Shopee และ LINE ให้ใช้คู่มือใน
 `docs/integrations/API_ONBOARDING_TH.md` หรือ `_EN.md` และกรอกแบบฟอร์ม
 `PROVIDER-APPROVAL-FORM_TH.md`/`_EN.md` โดยไม่ใส่ secret ค่าที่ provider ใช้เป็น
@@ -67,6 +72,11 @@ curl -fsS http://192.168.74.130:18765/api/health
 
 The unit file is `deploy/systemd/uperfect.service`. Identify the owning unit and
 process before restarting anything.
+
+Additional templates are in `deploy/README.md`, `deploy/Dockerfile`,
+`deploy/docker-compose.yml`, and `deploy/nginx/uperfect.conf.example`. Compose
+and Nginx are optional and do not replace the current systemd owner; verify that
+`192.168.74.130:18765` is available before using them.
 
 Use `docs/integrations/API_ONBOARDING_EN.md` and
 `docs/integrations/PROVIDER-APPROVAL-FORM_EN.md` for provider access and owner

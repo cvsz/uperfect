@@ -23,6 +23,7 @@ should start.
 - [Dashboard i18n / ระบบสองภาษา](docs/I18N.md)
 - [Operations / ปฏิบัติการ](docs/OPERATIONS.md)
 - [Deployment / การ deploy](docs/DEPLOYMENT.md)
+- [Deployment templates / แม่แบบ deploy](deploy/README.md)
 - [Product and chatbot assets / สินค้าและ asset แชท](docs/ASSET-CATALOG.md)
 - [Release checklist / เช็กลิสต์ release](docs/RELEASE-CHECKLIST.md)
 - [Thai API onboarding](docs/integrations/API_ONBOARDING_TH.md)
@@ -38,6 +39,7 @@ should start.
 ## GitHub documents / เอกสาร GitHub
 
 - [GitHub workflow](.github/README.md)
+- [GitHub Actions CI](.github/workflows/ci.yml)
 - [Pull request template](.github/PULL_REQUEST_TEMPLATE.md)
 - [Bug report](.github/ISSUE_TEMPLATE/bug_report.md)
 - [Feature request](.github/ISSUE_TEMPLATE/feature_request.md)
@@ -47,6 +49,9 @@ should start.
 ## Release truth / สถานะ release
 
 - Local FastAPI + PWA: runnable and tested.
+- CI workflow: compile, pytest, and whitespace checks are defined.
+- Docker Compose/Nginx: templates exist; systemd remains the current local
+  runtime owner.
 - SQLite local persistence: active runtime boundary.
 - Product memory and sales assets: validated from local files.
 - TH/EN Dashboard: language switch and bilingual API guide links are implemented.

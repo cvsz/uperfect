@@ -22,6 +22,7 @@ connections.
 - [Thai provider approval form](docs/integrations/PROVIDER-APPROVAL-FORM_TH.md)
 - [English provider approval form](docs/integrations/PROVIDER-APPROVAL-FORM_EN.md)
 - [GitHub workflow and templates](.github/README.md)
+- [Deployment templates](deploy/README.md)
 
 ## Run locally
 
@@ -105,7 +106,12 @@ not as proof of an active API connection.
 ```bash
 .venv/bin/python -m pytest -q
 .venv/bin/python -m compileall -q app scripts
+node --check web/app.js
 ```
+
+GitHub Actions repeats the compile, test, and whitespace checks from
+`.github/workflows/ci.yml`. Docker and Nginx templates are optional deployment
+artifacts under `deploy/`; the systemd unit remains the current local runtime.
 
 ZIP export is canceled for this release: no archive is generated or
 published. The unused local packaging helper remains outside the runtime path.

@@ -39,6 +39,10 @@ is used.
 | `app/services/settings.py` | Persisted workspace preferences and Autobot policy provider | Verified locally |
 | `app/services/notifications.py` | Retryable LINE notification outbox | Verified locally |
 | `deploy/systemd/uperfect.service` | LAN binding and local Ollama environment | Active service |
+| `deploy/Dockerfile` | Non-root Python 3.12 container template | Static contract test |
+| `deploy/docker-compose.yml` | Local-only Compose template with SQLite volume and health check | Compose config validated |
+| `deploy/nginx/uperfect.conf.example` | Optional `uperfect.zeaz.dev` reverse-proxy template | Static contract test |
+| `deploy/README.md` | TH/EN deployment instructions and ownership boundary | Documentation |
 | `app/api.py` | JSON routes for dashboard, catalog, inbox, orders, integrations, webhooks | API tests |
 | `web/index.html` | Semantic dashboard shell and TH/EN controls | PWA tests |
 | `web/styles.css` | Responsive operational UI for mobile/desktop | Browser smoke target |
@@ -49,6 +53,7 @@ is used.
 | `.env.example` | Secret names with empty values only | Secret audit |
 | `assets/chatbot/sales_response_assets.json` | TH/EN intents, objections, selling points, and closing CTAs | Validated locally |
 | `assets/chatbot/asset-manifest.json` | Local product media manifest and asset policy | Validated locally |
+| `assets/loe_soap/` and canonical product asset directories | Normalized local media paths and bilingual soap reference | Manifest test |
 | `docs/integrations/API_ONBOARDING_TH.md` | Full Thai provider setup guide | Documentation |
 | `docs/integrations/API_ONBOARDING_EN.md` | Full English provider setup guide | Documentation |
 | `docs/integrations/PROVIDER-APPROVAL-FORM_TH.md` | Thai owner approval/evidence workbook | Documentation; no secrets |
@@ -58,9 +63,11 @@ is used.
 | `DEV-MANUAL.md` | Runtime, API, i18n, assets, testing, and release workflow in TH/EN | Documentation |
 | `PROJECT-DOCUMENTATION.md` and `docs/` | Project map, architecture, API, operations, assets, i18n, release checklist | Documentation |
 | `.github/` | TH/EN contribution, PR, bug, feature, integration, and docs templates | GitHub workflow |
+| `.github/workflows/ci.yml` | Compile, pytest, and whitespace checks on push/PR | Static contract test |
 | `docs/DEPLOYMENT.md` | Local service, Cloudflare/Terraform ownership, public-route verification, and rollback boundary | Documentation; infrastructure is managed outside this repo |
 | `scripts/package_release.py` | Unused local packaging helper retained outside runtime deployment | Not executed; ZIP export canceled |
 | `tests/` | Unit, API, integration, PWA, and package regression coverage | `pytest -q` |
+| `tests/test_asset_manifest.py` and `tests/test_ci_and_deploy.py` | Canonical asset and deployment contract coverage | Focused tests |
 | `export-manifest.json` | Original TikTok public retrieval boundary | CAPTCHA status recorded |
 
 ## Product memory
@@ -89,6 +96,11 @@ response pack uses a friendly, cute admin voice with one clear closing CTA, but
 keeps unpriced/reference-only products in admin review and includes sensitive-
 skin patch-test guidance.
 
+Product media directories referenced by the manifest are normalized to ASCII
+lowercase underscore names. `LOE_CHARCOAL_SOAP` now has a bilingual
+reference-only document and image path; price, stock, and final claims remain
+admin-verification requirements.
+
 The runtime endpoints are `GET /api/sales-assets`, `GET /api/integration-guides`,
 `/assets/`, and `/guides/`. These routes expose no credential values. The
 approval workbooks record only non-secret identifiers and redacted evidence.
@@ -111,6 +123,9 @@ approval workbooks record only non-secret identifiers and redacted evidence.
 - External provider callbacks cannot target the private LAN host directly; a
   public HTTPS adapter with provider-specific signature/state validation is a
   separate deployment gate.
+- LINE July 2026 news was reviewed in the bilingual onboarding guides. LIFF,
+  rich-menu statistics, and LINE MINI App IAP are outside this release; any
+  future LINE sender must preserve outbox idempotency and provider retry rules.
 
 ## Verification record
 
@@ -120,6 +135,8 @@ Run from the project root:
 .venv/bin/python -m pytest -q
 .venv/bin/python -m compileall -q app scripts
 node --check web/app.js
+.venv/bin/python -m pytest -q tests/test_ci_and_deploy.py
+docker compose -f deploy/docker-compose.yml config
 git diff --check
 ```
 

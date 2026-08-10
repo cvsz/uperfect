@@ -35,6 +35,8 @@ assets/chatbot/
   asset-manifest.json             local media policy and paths
 docs/integrations/                provider onboarding guides
                                   provider approval workbooks TH/EN
+deploy/                           systemd, Docker, Compose, and Nginx templates
+.github/workflows/ci.yml          compile, pytest, and diff-check workflow
 tests/                            unit, API, integration, PWA, and asset tests
 ```
 
@@ -121,6 +123,8 @@ paths.
 .venv/bin/python -m pytest -q
 .venv/bin/python -m compileall -q app scripts
 node --check web/app.js
+.venv/bin/python -m pytest -q tests/test_ci_and_deploy.py
+docker compose -f deploy/docker-compose.yml config
 ```
 
 For route smoke tests:
@@ -161,6 +165,8 @@ and generated release files.
 ### 9. Deployment and release
 
 - systemd unit: `deploy/systemd/uperfect.service`
+- optional container/proxy templates: `deploy/Dockerfile`,
+  `deploy/docker-compose.yml`, `deploy/nginx/uperfect.conf.example`
 - database: `/mnt/uperfect/uperfect.db` in local mode
 - bind: `192.168.74.130:18765`
 - static assets: `/assets` and `/guides`
@@ -255,7 +261,8 @@ credentials in frontend code, catalog data, SQL seeds, tests, or release files.
 ### 9. Deployment and signing
 
 The systemd unit binds to `192.168.74.130:18765`; local assets and guides are
-mounted at `/assets` and `/guides`. ZIP export is canceled for this release.
+mounted at `/assets` and `/guides`. Optional Docker/Compose/Nginx templates live
+under `deploy/`; ZIP export is canceled for this release.
 
 Before release, run the test suite, `git diff --check`, secret-pattern review,
 and separate local/public health evidence from provider verification. Use the

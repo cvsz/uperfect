@@ -8,6 +8,7 @@
 - [ ] `.venv/bin/python -m compileall -q app scripts`
 - [ ] `node --check web/app.js`
 - [ ] `git diff --check`
+- [ ] `tests/test_ci_and_deploy.py` ผ่าน และ `docker compose -f deploy/docker-compose.yml config` ผ่านถ้ามี Docker
 - [ ] ตรวจ no secret/token/PIN/passphrase ใน diff และ artifact
 
 ### Dashboard
@@ -43,6 +44,7 @@
 ### Code and tests
 
 - [ ] Run pytest, compileall, `node --check`, and `git diff --check`.
+- [ ] Run the CI/deployment contract tests and validate Compose config when Docker is available.
 - [ ] Search the diff and artifacts for secrets, tokens, PINs, and passphrases.
 
 ### Dashboard
