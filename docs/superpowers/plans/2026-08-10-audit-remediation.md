@@ -66,7 +66,7 @@
 - Read: app/services/settings.py, app/settings.py, app/schemas.py, tests/conftest.py
 
 **Interfaces:**
-- Consumes: services.settings, default_workspace_settings, decimal_value,
+- Consumes: services.workspace_settings, default_workspace_settings, decimal_value,
   decimal_json, parse_json_object, and domain errors.
 - Produces: direct coverage for settings allow-list behavior and schema helpers.
 
