@@ -115,7 +115,11 @@ class Settings:
                 else "unconfigured"
             )
         values = requirements.get(name, ())
-        return "configured" if values and all(values) else "unconfigured"
+        if not values or not all(values):
+            return "unconfigured"
+        if name in {"facebook", "tiktok", "shopee"} and not self.webhook_secret(name):
+            return "degraded"
+        return "configured"
 
     def webhook_secret(self, provider: str) -> str | None:
         return {
