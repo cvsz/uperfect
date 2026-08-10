@@ -80,7 +80,7 @@
 
 **Interfaces:**
 - `Database.initialize()` records baseline version 1 and applies version 2.
-- `Repository.claim_notification(notification_id, worker_id, lease_seconds=60)` atomically claims one retryable event.
+- `Repository.claim_next_notification(worker_id, lease_seconds=60)` atomically claims one retryable event.
 - `Repository.pending_notifications()` remains the UI listing; `claim_notification()` is the worker-only mutation.
 
 - [ ] **Step 1: Write migration/lease tests**

@@ -1,5 +1,9 @@
 # U.Perfect Audit Remediation Design
 
+> Historical design note. The final canonical asset consolidation is documented
+> in `2026-08-10-scrutinize-hardening-design.md` and moves all VIT C media under
+> `assets/loe_vit_c_aura_serum/`.
+
 **Date:** 2026-08-10
 
 **Status:** Approved for implementation

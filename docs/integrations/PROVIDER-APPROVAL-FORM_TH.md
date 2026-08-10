@@ -21,7 +21,8 @@ GitHub issue เท่านั้น ห้ามใส่ token, secret, PIN, 
 - U.Perfect local runtime: `http://192.168.74.130:18765`
 - Local AI: `http://192.168.74.130:11434` และ `zCoder:latest`
 - สถานะ provider เริ่มต้น: `unconfigured`
-- route `POST /api/webhooks/{provider}` เป็น normalized local test เท่านั้น
+- route `POST /api/webhooks/{provider}` เป็น normalized local test ที่ตรวจ HMAC
+  จาก raw body เท่านั้น
 - ห้ามใช้ `192.168.74.130` เป็น callback/webhook ของ provider ภายนอก เพราะ
   เป็น private LAN address; provider ต้องเข้าถึง HTTPS adapter ที่มี certificate
   และตรวจลายเซ็นได้
@@ -70,8 +71,8 @@ GitHub issue เท่านั้น ห้ามใส่ token, secret, PIN, 
 | Raw payload retention policy | <!-- กรอกอายุ/การลบ --> |
 
 `POST /api/webhooks/{provider}` ของระบบปัจจุบันรับเฉพาะ normalized test payload
-ที่มี header `X-UPerfect-Webhook-Verified: true` จาก test ฝั่ง server ห้ามนำ raw
-payload จาก provider มายิง route นี้โดยตรง
+ที่มี provider-specific HMAC header จาก test ฝั่ง server ห้ามนำ raw payload จาก
+provider มายิง route นี้โดยตรง
 
 <a id="facebook-messenger-meta"></a>
 ## 3. Facebook Messenger / Meta
@@ -298,7 +299,7 @@ payload จาก provider มายิง route นี้โดยตรง
 | --- | --- | --- |
 | Channel access token | `LINE_CHANNEL_ACCESS_TOKEN` | ใช้กับ outbound outbox เมื่อ owner ตั้งค่า |
 | Admin destination | `LINE_ADMIN_DESTINATION` | ใช้กับ outbound outbox |
-| Channel secret | future server setting | จำเป็นสำหรับ inbound adapter |
+| Channel secret | `LINE_CHANNEL_SECRET` | HMAC ของ inbound boundary; server-only |
 
 ระบบ release นี้ยังไม่เปิด LINE inbound chatbot และไม่อ้างว่า LINE ส่งจริง
 จนกว่าจะมี token, destination, sender transport และหลักฐาน test ครบ

@@ -15,6 +15,7 @@ app/
   api.py                          JSON routes and request models
   config.py                       environment-only runtime settings
   database.py                     SQLite schema/transaction boundary
+  migrations.py                   additive SQLite schema version runner
   repositories.py                 persistence, idempotency, audit, outbox
   schemas.py                      domain types and stable errors
   seed.py                         merchant catalog and workspace defaults
@@ -24,7 +25,10 @@ app/
   services/orders.py              pricing, inventory, payment state machine
   services/integrations.py        provider status and normalized webhook gate
   services/notifications.py       retryable LINE outbox
+  services/line.py                server-only LINE push transport
+  services/webhook_auth.py        raw-body HMAC verification
   services/settings.py            safe workspace preferences
+  worker.py                       separate notification polling worker
 web/
   index.html                      PWA shell and navigation
   app.js                          API-driven render and TH/EN i18n
@@ -37,6 +41,7 @@ docs/integrations/                provider onboarding guides
                                   provider approval workbooks TH/EN
 deploy/                           systemd, Docker, Compose, and Nginx templates
 .github/workflows/ci.yml          compile, pytest, and diff-check workflow
+migrations/                       PostgreSQL schema parity migrations
 tests/                            unit, API, integration, PWA, and asset tests
 ```
 
@@ -58,10 +63,14 @@ cp .env.example .env.local  # เก็บนอก Git และไม่ใส
 
 - local: `UPERFECT_DATABASE_PATH`, `UPERFECT_LOCAL_ONLY`,
   `UPERFECT_LOCAL_AI_BASE_URL`, `UPERFECT_LOCAL_AI_MODEL`
-- Facebook: `FACEBOOK_PAGE_ACCESS_TOKEN`, `FACEBOOK_VERIFY_TOKEN`
+- Facebook: `FACEBOOK_PAGE_ACCESS_TOKEN`, `FACEBOOK_VERIFY_TOKEN`,
+  `FACEBOOK_APP_SECRET`
 - TikTok: `TIKTOK_APP_KEY`, `TIKTOK_APP_SECRET`, `TIKTOK_REFRESH_TOKEN`
-- Shopee: `SHOPEE_PARTNER_ID`, `SHOPEE_PARTNER_KEY`, `SHOPEE_SHOP_ID`
-- LINE outbox: `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_ADMIN_DESTINATION`
+- TikTok normalized webhook: `TIKTOK_WEBHOOK_SECRET`
+- Shopee: `SHOPEE_PARTNER_ID`, `SHOPEE_PARTNER_KEY`, `SHOPEE_SHOP_ID`,
+  `SHOPEE_WEBHOOK_SECRET`
+- LINE outbox/inbound boundary: `LINE_CHANNEL_ACCESS_TOKEN`,
+  `LINE_ADMIN_DESTINATION`, `LINE_CHANNEL_SECRET`
 - gated automation/model: `N8N_WEBHOOK_URL`, `GEMINI_API_KEY`
 
 `app.config.Settings` ให้ค่า secret เป็น `repr` ที่ปกปิด และ API ไม่ส่ง secret
@@ -87,10 +96,19 @@ cp .env.example .env.local  # เก็บนอก Git และไม่ใส
 | GET | `/api/notifications` | pending/failed LINE outbox events |
 | POST | `/api/webhooks/{provider}` | normalized local webhook test gate |
 
-The local webhook route requires `X-UPerfect-Webhook-Verified: true`, a supported
-provider, `event_id`, `customer_id`, and message text. It is not a raw provider
-adapter. A production adapter must validate provider signatures before calling
-the normalized service.
+The normalized webhook route requires a supported provider, `event_id`,
+`customer_id`, message text, and an HMAC over the exact raw body:
+
+| Provider | Header | Secret |
+| --- | --- | --- |
+| Facebook | `X-Hub-Signature-256: sha256=<hex>` | `FACEBOOK_APP_SECRET` |
+| LINE | `X-Line-Signature: <base64>` | `LINE_CHANNEL_SECRET` |
+| TikTok/Shopee | `X-UPerfect-Webhook-Signature: sha256=<hex>` | provider webhook secret |
+
+Invalid or missing signatures return `WEBHOOK_SIGNATURE_INVALID` (401). The old
+`X-UPerfect-Webhook-Verified: true` header is not a bypass. This remains a
+normalized boundary, not a raw provider adapter; production adapters must still
+validate provider-specific signatures, state, timestamps, and permissions.
 
 ### 5. Add or edit a response asset
 
@@ -141,8 +159,25 @@ provider approval workbooks at `/guides/PROVIDER-APPROVAL-FORM_TH.md` and
 stores. Keep the local-only normalized webhook boundary separate from any
 future public HTTPS provider adapter.
 
-For a normalized webhook test, use a non-secret test header only in a trusted
-local request and verify the same event twice to prove idempotency.
+For a normalized webhook test, sign the exact UTF-8 JSON bytes with an isolated
+test secret, verify the same event twice to prove idempotency, and never place a
+real secret in a test file or command transcript.
+
+### 8.1 Migration และ worker
+
+`Database.initialize()` บันทึก schema เดิมเป็น version 1 และ apply migration แบบ
+เพิ่มอย่างเดียวจนถึง version 2 ซึ่งเพิ่ม lease/retry columns ให้ outbox การรันซ้ำ
+ปลอดภัยและไม่แทนที่ข้อมูลเดิม
+
+```bash
+.venv/bin/python -m pytest -q tests/test_migrations.py tests/test_worker.py
+systemctl --user status uperfect-worker.service
+systemctl --user restart uperfect-worker.service
+```
+
+worker จะ dormant หากไม่มี `LINE_CHANNEL_ACCESS_TOKEN` และ
+`LINE_ADMIN_DESTINATION`; event ที่ยืนยันแล้วจะยังดูได้ที่ `/api/notifications`
+จนกว่าจะมี sender ฝั่ง server พร้อม
 
 ### 8. Provider adapters
 
@@ -164,7 +199,8 @@ and generated release files.
 
 ### 9. Deployment and release
 
-- systemd unit: `deploy/systemd/uperfect.service`
+- systemd units: `deploy/systemd/uperfect.service` และ
+  `deploy/systemd/uperfect-worker.service`
 - optional container/proxy templates: `deploy/Dockerfile`,
   `deploy/docker-compose.yml`, `deploy/nginx/uperfect.conf.example`
 - database: `/mnt/uperfect/uperfect.db` in local mode
@@ -207,8 +243,8 @@ Open `http://192.168.74.130:18765/` from a device on the same LAN.
 
 Local runtime values are `UPERFECT_DATABASE_PATH`, `UPERFECT_LOCAL_ONLY`,
 `UPERFECT_LOCAL_AI_BASE_URL`, and `UPERFECT_LOCAL_AI_MODEL`. Provider values
-cover Facebook, TikTok Shop, Shopee, LINE outbox, n8n, and gated Gemini as
-listed in `.env.example`.
+cover Facebook, TikTok Shop, Shopee, LINE outbox/signatures, n8n, and gated
+Gemini as listed in `.env.example`.
 
 `app.config.Settings` masks secret values in representation and API responses
 never expose them. Add a non-disclosure test when introducing a new setting.
@@ -221,9 +257,9 @@ guarded transitions, `/api/integrations`, `/api/integration-guides`,
 `/api/sales-assets`, `/api/settings`, `/api/notifications`, and the normalized
 webhook test route.
 
-The normalized webhook route requires the trusted local test header and event
-fields. It is not a raw provider adapter. Production adapters must validate
-provider signatures before normalization.
+The normalized webhook route requires provider-specific HMAC headers over the
+exact raw body and event fields. It is not a raw provider adapter. Production
+adapters must validate provider signatures before normalization.
 
 ### 5. Response assets
 
@@ -242,14 +278,15 @@ version when static files change.
 
 ```bash
 .venv/bin/python -m pytest -q
-.venv/bin/python -m compileall -q app scripts
+.venv/bin/python -m compileall -q app scripts tests
 node --check web/app.js
+docker compose -f deploy/docker-compose.yml config
 git diff --check
 ```
 
-Run health, sales-assets, integration-guides, and trusted normalized webhook
+Run health, sales-assets, integration-guides, and signed normalized webhook
 smoke tests from a controlled local environment. Verify duplicate events are
-processed once.
+processed once and inspect notification worker/outbox behavior separately.
 
 ### 8. Provider adapter boundary
 

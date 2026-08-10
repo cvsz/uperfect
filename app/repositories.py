@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any
 
@@ -483,6 +483,47 @@ class Repository:
             )
         return notification_id
 
+    def claim_next_notification(self, worker_id: str, lease_seconds: int = 60) -> dict[str, Any] | None:
+        if not worker_id.strip():
+            raise ValueError("worker_id must not be empty")
+        now = utcnow()
+        now_value = timestamp(now)
+        lease_until = timestamp(now + timedelta(seconds=max(1, lease_seconds)))
+        with self.database.transaction() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                """
+                SELECT id
+                FROM notification_outbox
+                WHERE status IN ('pending', 'failed')
+                  AND (locked_until IS NULL OR locked_until <= ?)
+                  AND (next_attempt_at IS NULL OR next_attempt_at <= ?)
+                ORDER BY created_at
+                LIMIT 1
+                """,
+                (now_value, now_value),
+            ).fetchone()
+            if row is None:
+                return None
+            updated = connection.execute(
+                """
+                UPDATE notification_outbox
+                SET locked_until = ?, locked_by = ?
+                WHERE id = ?
+                  AND status IN ('pending', 'failed')
+                  AND (locked_until IS NULL OR locked_until <= ?)
+                  AND (next_attempt_at IS NULL OR next_attempt_at <= ?)
+                """,
+                (lease_until, worker_id, row["id"], now_value, now_value),
+            )
+            if updated.rowcount != 1:
+                return None
+            claimed = connection.execute(
+                "SELECT * FROM notification_outbox WHERE id = ?",
+                (row["id"],),
+            ).fetchone()
+            return dict(claimed) if claimed else None
+
     def pending_notifications(self, limit: int = 20) -> list[dict[str, Any]]:
         with self.database.transaction() as connection:
             return [
@@ -497,15 +538,26 @@ class Repository:
     def mark_notification_sent(self, notification_id: str) -> None:
         with self.database.transaction() as connection:
             connection.execute(
-                "UPDATE notification_outbox SET status='sent', sent_at=?, attempts=attempts+1 WHERE id = ?",
+                "UPDATE notification_outbox SET status='sent', sent_at=?, attempts=attempts+1, "
+                "locked_until=NULL, locked_by=NULL, next_attempt_at=NULL WHERE id = ?",
                 (timestamp(), notification_id),
             )
 
     def record_notification_failure(self, notification_id: str, error: str) -> None:
         with self.database.transaction() as connection:
+            row = connection.execute(
+                "SELECT attempts FROM notification_outbox WHERE id = ?",
+                (notification_id,),
+            ).fetchone()
+            if row is None:
+                return
+            attempts = int(row["attempts"]) + 1
+            delay_seconds = min(300, 2 ** min(attempts, 8))
+            next_attempt = timestamp(utcnow() + timedelta(seconds=delay_seconds))
             connection.execute(
-                "UPDATE notification_outbox SET status='failed', attempts=attempts+1, last_error=? WHERE id = ?",
-                (error[:240], notification_id),
+                "UPDATE notification_outbox SET status='failed', attempts=?, last_error=?, "
+                "locked_until=NULL, locked_by=NULL, next_attempt_at=? WHERE id = ?",
+                (attempts, error[:240], next_attempt, notification_id),
             )
 
     def pending_notification_count(self) -> int:

@@ -1,9 +1,10 @@
 from decimal import Decimal
+from datetime import timedelta
 
 import pytest
 
 from app.database import Database
-from app.repositories import Repository
+from app.repositories import Repository, timestamp, utcnow
 
 
 @pytest.fixture()
@@ -40,6 +41,44 @@ def test_notification_failure_can_be_marked_sent(repository):
 
     repository.mark_notification_sent(notification_id)
     assert repository.pending_notification_count() == 0
+
+
+def test_notification_claim_is_exclusive_until_lease_expires(repository):
+    notification_id = repository.add_notification("test", "admin-line", "body")
+
+    first = repository.claim_next_notification("worker-a", lease_seconds=60)
+    second = repository.claim_next_notification("worker-b", lease_seconds=60)
+
+    assert first["id"] == notification_id
+    assert first["locked_by"] == "worker-a"
+    assert second is None
+
+    with repository.database.transaction() as connection:
+        connection.execute(
+            "UPDATE notification_outbox SET locked_until = ? WHERE id = ?",
+            (timestamp(utcnow() - timedelta(seconds=1)), notification_id),
+        )
+
+    recovered = repository.claim_next_notification("worker-b", lease_seconds=60)
+    assert recovered["id"] == notification_id
+    assert recovered["locked_by"] == "worker-b"
+
+
+def test_notification_failure_schedules_a_retry(repository):
+    notification_id = repository.add_notification("test", "admin-line", "body")
+
+    repository.record_notification_failure(notification_id, "offline")
+
+    with repository.database.transaction() as connection:
+        row = connection.execute(
+            "SELECT status, attempts, next_attempt_at, locked_until, locked_by FROM notification_outbox WHERE id = ?",
+            (notification_id,),
+        ).fetchone()
+    assert row["status"] == "failed"
+    assert row["attempts"] == 1
+    assert row["next_attempt_at"]
+    assert row["locked_until"] is None
+    assert row["locked_by"] is None
 
 
 def test_inventory_reservation_rejects_quantity_above_available_stock(repository):

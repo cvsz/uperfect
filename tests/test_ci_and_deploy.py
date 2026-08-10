@@ -15,7 +15,7 @@ def test_ci_workflow_runs_supported_checks():
     assert "actions/setup-python@v5" in workflow
     assert 'python-version: "3.12"' in workflow
     assert "requirements-dev.txt" in workflow
-    assert "python -m compileall -q app scripts" in workflow
+    assert "python -m compileall -q app scripts tests" in workflow
     assert "python -m pytest -q" in workflow
     assert "git diff --check" in workflow
 
@@ -39,6 +39,16 @@ def test_compose_keeps_the_local_only_network_boundary():
     assert "UPERFECT_LOCAL_AI_BASE_URL: http://192.168.74.130:11434" in compose
     assert "UPERFECT_LOCAL_AI_MODEL: zCoder:latest" in compose
     assert "/api/health" in compose
+
+
+def test_compose_and_systemd_define_a_separate_notification_worker():
+    compose = read("deploy/docker-compose.yml")
+    worker_unit = read("deploy/systemd/uperfect-worker.service")
+
+    assert "  worker:" in compose
+    assert "app.worker" in compose
+    assert "ExecStart=/mnt/uperfect/.venv/bin/python -m app.worker" in worker_unit
+    assert "UPERFECT_DATABASE_PATH=/mnt/uperfect/uperfect.db" in worker_unit
 
 
 def test_nginx_template_routes_only_to_the_documented_origin():

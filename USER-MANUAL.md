@@ -63,6 +63,7 @@ path เป็น URL ภายนอกโดยไม่ผ่านการ�
 - หลักฐานการชำระเงินเปลี่ยนเป็น `pending_review`
 - เฉพาะผู้มีสิทธิ์เท่านั้นที่เปลี่ยนเป็น `confirmed`
 - เมื่อยืนยันแล้ว ระบบเขียนเหตุการณ์ลง LINE notification outbox
+- worker จะ claim event ด้วย lease, ส่งจาก server และ retry failure ตาม backoff
 - การส่ง LINE จริงต้องตั้งค่า LINE ฝั่ง server และยังไม่ส่งจาก browser
 
 ### 6. อ่านสถานะช่องทาง
@@ -85,7 +86,7 @@ path เป็น URL ภายนอกโดยไม่ผ่านการ�
 | คำตอบไม่ตรงภาษา | กด TH/EN และตรวจ `default_language` ใน Settings |
 | บอทไม่ตอบ | ตรวจ Autobot enabled และ human takeover |
 | สร้างออเดอร์ไม่ได้ | ตรวจราคา สต็อก และสถานะสินค้าใน Product Memory |
-| LINE ไม่ส่ง | ดู Channels และ notification outbox; อย่าใส่ token ใน browser |
+| LINE ไม่ส่ง | ดู Channels, notification outbox และ `uperfect-worker.service`; อย่าใส่ token ใน browser |
 
 ### 8. ข้อมูลที่ห้ามส่งเข้าระบบสาธารณะ
 
@@ -150,7 +151,8 @@ asset paths with an external URL without reviewing the asset policy.
 - Payment evidence moves an order to `pending_review`.
 - Only an authorized reviewer can move it to `confirmed`.
 - A confirmed order creates a LINE notification outbox event.
-- Actual LINE delivery requires server-side LINE configuration and never runs from the browser.
+- The worker claims events with a lease, retries transport failures, and delivers only after server-side LINE configuration.
+- Actual LINE delivery never runs from the browser.
 
 ### 6. Channel status
 
@@ -172,7 +174,7 @@ in this release. Opening the Dashboard does not authorize any account.
 | Wrong language | Switch TH/EN and check `default_language` in Settings. |
 | Bot does not reply | Check Autobot enabled and human takeover state. |
 | Cannot create an order | Check price, stock, and product availability. |
-| LINE is not delivered | Review Channels and the notification outbox; never put the token in the browser. |
+| LINE is not delivered | Review Channels, the notification outbox, and `uperfect-worker.service`; never put the token in the browser. |
 
 ### 8. Never publish
 

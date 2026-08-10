@@ -17,11 +17,13 @@ Messenger, TikTok Shop, Shopee และ LINE Messaging API
 
 The dashboard can show provider status, guide links, and secret-free setup
 fields. It does not perform OAuth, token exchange, payment verification, or
-provider-specific webhook signature validation in the browser.
+provider-specific webhook signature validation in the browser. The server
+validates HMAC over the exact raw body at the normalized boundary.
 
 Dashboard สามารถแสดงสถานะ provider ลิงก์คู่มือ และช่องกรอกค่าตั้งค่าแบบไม่เปิดเผย
 secret ได้ แต่ยังไม่ทำ OAuth, token exchange, payment verification หรือการตรวจ
-ลายเซ็น webhook เฉพาะ provider ใน browser
+ลายเซ็น webhook เฉพาะ provider ใน browser; server จะตรวจ HMAC จาก raw body ที่
+normalized boundary
 
 เจ้าของบัญชีใช้แบบฟอร์มอนุมัติเพื่อเก็บ identifiers, scopes, callback/webhook,
 review evidence และ sign-off โดยไม่เก็บ credential
@@ -44,15 +46,18 @@ notification outbox เท่านั้น ยังไม่เปิดร�
 - Sales assets: `GET /api/sales-assets`
 - This guide index: `GET /api/integration-guides`
 
-The normalized local webhook test requires the server-side test header
-`X-UPerfect-Webhook-Verified: true`. Provider raw payloads must not be sent to
-this route until an official provider adapter performs signature validation and
-normalizes the event.
+The normalized local webhook test requires a provider-specific HMAC over the
+exact raw body. Use `X-Hub-Signature-256` for Facebook,
+`X-Line-Signature` for LINE, and `X-UPerfect-Webhook-Signature` for the
+normalized TikTok/Shopee boundary. Provider raw payloads must not be sent to
+this route until an official provider adapter performs provider-specific
+signature/state validation and normalizes the event.
 
-การทดสอบ webhook ภายในต้องส่ง header
-`X-UPerfect-Webhook-Verified: true` จากฝั่ง server test เท่านั้น ห้ามส่ง raw
-payload ของ provider เข้า route นี้จนกว่าจะมี adapter ที่ตรวจลายเซ็นและแปลง
-event เป็นรูปแบบกลางเรียบร้อยแล้ว
+การทดสอบ webhook ภายในต้องส่ง HMAC จาก raw body ตาม provider: Facebook ใช้
+`X-Hub-Signature-256`, LINE ใช้ `X-Line-Signature` และ normalized TikTok/Shopee
+ใช้ `X-UPerfect-Webhook-Signature` ห้ามส่ง raw payload ของ provider เข้า route
+นี้จนกว่าจะมี adapter ที่ตรวจ signature/state ของ provider และแปลง event เป็น
+รูปแบบกลางเรียบร้อยแล้ว
 
 External provider callbacks cannot target `192.168.74.130` directly. A public
 HTTPS adapter and server-side signature validation are required before live

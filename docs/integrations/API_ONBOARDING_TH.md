@@ -85,9 +85,10 @@ Dashboard อย่างเดียว
 ### Gate ของ U.Perfect
 
 Route local test ปัจจุบันคือ `POST /api/webhooks/facebook` และรับ normalized
-payload เช่น `event_id`, `customer_id`, `text` เมื่อมี header test ที่ถูกต้อง
-เท่านั้น นี่ไม่ใช่ raw Meta adapter และยังไม่ยืนยันลายเซ็นเฉพาะ Meta ให้สร้าง
-adapter server-side ก่อนรับ traffic จาก Meta จริง
+payload เช่น `event_id`, `customer_id`, `text` เมื่อมี
+`X-Hub-Signature-256: sha256=<hex>` ที่คำนวณจาก raw body ด้วย
+`FACEBOOK_APP_SECRET` เท่านั้น นี่ไม่ใช่ raw Meta adapter; adapter server-side
+ยังต้องตรวจ signature/state ของ Meta ก่อนรับ traffic จริง
 
 <a id="tiktok-shop-open-platform"></a>
 ## 3. TikTok Shop Open Platform
@@ -156,8 +157,9 @@ adapter server-side ก่อนรับ traffic จาก Meta จริง
 ### Gate ของ U.Perfect
 
 `POST /api/webhooks/tiktok` ปัจจุบันเป็น normalized local test boundary เท่านั้น
-ต้องมี `X-UPerfect-Webhook-Verified: true` และ `event_id` เพื่อให้ idempotency
-ทำงาน ยังไม่ควรผูก raw TikTok webhook เข้ากับ route นี้โดยตรง
+ต้องมี `X-UPerfect-Webhook-Signature: sha256=<hex>` จาก raw body ด้วย
+`TIKTOK_WEBHOOK_SECRET` และ `event_id` เพื่อให้ idempotency ทำงาน ยังไม่ควรผูก
+raw TikTok webhook เข้ากับ route นี้โดยตรง
 
 <a id="shopee-open-platform"></a>
 ## 4. Shopee Open Platform
@@ -205,8 +207,9 @@ adapter server-side ก่อนรับ traffic จาก Meta จริง
 ### Gate ของ U.Perfect
 
 `POST /api/webhooks/shopee` เป็น normalized local test boundary เช่นเดียวกับ
-provider อื่น ต้องผ่าน header test และ event idempotency ก่อน ระบบยังไม่ได้
-กล่าวอ้างว่า Shopee chat/order adapter production พร้อมใช้งาน
+provider อื่น ต้องผ่าน `X-UPerfect-Webhook-Signature: sha256=<hex>` จาก raw body
+ด้วย `SHOPEE_WEBHOOK_SECRET` และ event idempotency ก่อน ระบบยังไม่ได้กล่าวอ้างว่า
+Shopee chat/order adapter production พร้อมใช้งาน
 
 <a id="line-messaging-api"></a>
 ## 5. LINE Messaging API
@@ -220,9 +223,10 @@ provider อื่น ต้องผ่าน header test และ event idemp
 ### ขอบเขต release นี้
 
 U.Perfect มี retryable notification outbox สำหรับแจ้งเหตุการณ์ออเดอร์ที่
-ยืนยันแล้วไปยัง LINE ปัจจุบันยังไม่มี inbound LINE chatbot route และยังไม่
-ควรนำ `LINE_CHANNEL_ACCESS_TOKEN` ไปใช้ตอบแชทลูกค้าโดยอัตโนมัติจนกว่าจะเพิ่ม
-adapter พร้อมตรวจลายเซ็น webhook
+ยืนยันแล้วไปยัง LINE และมี normalized inbound boundary ที่ตรวจ
+`X-Line-Signature` ด้วย `LINE_CHANNEL_SECRET` จาก raw body ปัจจุบันยังไม่มี
+inbound LINE chatbot adapter production และยังไม่ควรนำ
+`LINE_CHANNEL_ACCESS_TOKEN` ไปใช้ตอบแชทลูกค้าโดยอัตโนมัติ
 
 ### หมายเหตุ compatibility จาก LINE Developers เดือนกรกฎาคม 2026
 
@@ -270,7 +274,7 @@ adapter พร้อมตรวจลายเซ็น webhook
 | --- | --- | --- |
 | channel access token | `LINE_CHANNEL_ACCESS_TOKEN` | ใช้กับ outbox เมื่อ owner ตั้งค่า |
 | admin destination | `LINE_ADMIN_DESTINATION` | ใช้กับ outbox |
-| channel secret | future server setting | จำเป็นเมื่อเปิด inbound webhook |
+| channel secret | `LINE_CHANNEL_SECRET` | HMAC ของ normalized/inbound boundary; server-only |
 
 ## 6. ตรวจผลหลังตั้งค่า
 

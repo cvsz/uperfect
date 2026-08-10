@@ -164,7 +164,10 @@ class Database:
                   attempts INTEGER NOT NULL DEFAULT 0,
                   last_error TEXT,
                   created_at TEXT NOT NULL,
-                  sent_at TEXT
+                  sent_at TEXT,
+                  locked_until TEXT,
+                  locked_by TEXT,
+                  next_attempt_at TEXT
                 );
 
                 CREATE TABLE IF NOT EXISTS audit_events (
@@ -177,6 +180,9 @@ class Database:
                 );
                 """,
             )
+            from app.migrations import apply_migrations
+
+            apply_migrations(connection)
             if seed:
                 from app.seed import seed_database
 

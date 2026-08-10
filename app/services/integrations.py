@@ -10,9 +10,10 @@ from app.config import LOCAL_OLLAMA_BASE_URL, Settings
 from app.repositories import Repository
 from app.schemas import IntegrationError, IntegrationStatus, InboundMessage, WebhookEvent, WebhookReceipt
 from app.services.conversations import ConversationService
+from app.services.webhook_auth import WebhookVerifier
 
 
-SUPPORTED_PROVIDERS = {"facebook", "tiktok", "shopee"}
+SUPPORTED_PROVIDERS = {"facebook", "line", "tiktok", "shopee"}
 
 
 class IntegrationService:
@@ -20,6 +21,10 @@ class IntegrationService:
         self.repository = repository
         self.settings = settings
         self.conversations = conversations
+        self.webhook_verifier = WebhookVerifier(settings)
+
+    def verify_request(self, provider: str, raw_body: bytes, headers) -> bool:
+        return self.webhook_verifier.verify(provider, raw_body, headers)
 
     def statuses(self) -> list[IntegrationStatus]:
         values = []
@@ -61,7 +66,7 @@ class IntegrationService:
         if provider not in SUPPORTED_PROVIDERS:
             raise IntegrationError("ไม่รองรับช่องทางนี้", code="UNSUPPORTED_PROVIDER")
         if not event.verified:
-            raise IntegrationError("webhook ยังไม่ผ่านการตรวจสอบลายเซ็น", code="WEBHOOK_NOT_VERIFIED", http_status=401)
+            raise IntegrationError("webhook ยังไม่ผ่านการตรวจสอบลายเซ็น", code="WEBHOOK_SIGNATURE_INVALID", http_status=401)
         if not event.event_id.strip() or not event.customer_id.strip() or not event.text.strip():
             raise IntegrationError("ข้อมูล webhook ไม่ครบถ้วน", code="INVALID_WEBHOOK")
         if not self.repository.claim_webhook(provider, event.event_id):

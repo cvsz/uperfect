@@ -92,8 +92,32 @@ Product Memory คือข้อมูลข้อเท็จจริงจ�
 `fulfilled` หลังผู้มีสิทธิ์ตรวจสอบหลักฐานแล้วเท่านั้น
 
 เมื่อ order เป็น `confirmed` ระบบจะสร้าง LINE outbox event หาก sender พร้อม
-ผู้ดูแลต้องตรวจ pending/failed events และใช้ retry ที่ server-side ไม่ส่ง token
-ผ่าน browser
+ผู้ดูแลต้องตรวจ pending/failed events และให้ `uperfect-worker.service` ส่งที่
+server-side ไม่ส่ง token ผ่าน browser
+
+ตรวจ worker และ migration ได้ด้วย:
+
+```bash
+systemctl --user status uperfect-worker.service
+systemctl --user restart uperfect-worker.service
+.venv/bin/python -m pytest -q tests/test_worker.py tests/test_migrations.py
+```
+
+ถ้าไม่มี `LINE_CHANNEL_ACCESS_TOKEN` หรือ `LINE_ADMIN_DESTINATION` worker จะ
+หยุดส่งอย่างตั้งใจและคง event ไว้ใน outbox ไม่ใช่รายงานว่าส่งสำเร็จ
+
+### 6.1 Webhook security
+
+normalized webhook ต้องมี HMAC ตาม provider และ secret อยู่ใน server environment:
+
+| Provider | Header | Environment |
+| --- | --- | --- |
+| Facebook | `X-Hub-Signature-256: sha256=<hex>` | `FACEBOOK_APP_SECRET` |
+| LINE | `X-Line-Signature: <base64>` | `LINE_CHANNEL_SECRET` |
+| TikTok/Shopee normalized boundary | `X-UPerfect-Webhook-Signature: sha256=<hex>` | `TIKTOK_WEBHOOK_SECRET` / `SHOPEE_WEBHOOK_SECRET` |
+
+ห้ามใช้ `X-UPerfect-Webhook-Verified: true` อีกต่อไป และห้ามส่ง raw provider
+payload เข้า normalized route ก่อน adapter ตรวจ signature/state ของ provider
 
 ### 7. n8n และ Auto Update
 
@@ -201,8 +225,32 @@ slip automatically, or reply after human takeover.
 The guarded lifecycle is `awaiting_payment` -> `pending_review` -> `confirmed` ->
 `fulfilled`, with authorized review required before confirmation.
 
-Confirmed orders create a LINE outbox event when the sender is available. Review
-pending/failed events and retry server-side; never send a token through the browser.
+Confirmed orders create a LINE outbox event. The separate
+`uperfect-worker.service` claims it with a lease, delivers it when the server
+has both LINE values, and leaves it retryable on failure. Never send a token
+through the browser.
+
+```bash
+systemctl --user status uperfect-worker.service
+systemctl --user restart uperfect-worker.service
+.venv/bin/python -m pytest -q tests/test_worker.py tests/test_migrations.py
+```
+
+With no `LINE_CHANNEL_ACCESS_TOKEN` or `LINE_ADMIN_DESTINATION`, the worker is
+intentionally dormant and keeps events in the outbox.
+
+### 6.1 Webhook security
+
+The normalized webhook boundary requires HMAC over the exact raw request body:
+
+| Provider | Header | Environment |
+| --- | --- | --- |
+| Facebook | `X-Hub-Signature-256: sha256=<hex>` | `FACEBOOK_APP_SECRET` |
+| LINE | `X-Line-Signature: <base64>` | `LINE_CHANNEL_SECRET` |
+| TikTok/Shopee normalized boundary | `X-UPerfect-Webhook-Signature: sha256=<hex>` | `TIKTOK_WEBHOOK_SECRET` / `SHOPEE_WEBHOOK_SECRET` |
+
+`X-UPerfect-Webhook-Verified: true` is no longer accepted. Raw provider payloads
+must pass provider-specific signature/state validation in an adapter first.
 
 ### 7. n8n and Auto Update
 
@@ -217,6 +265,7 @@ curl http://192.168.74.130:18765/api/health
 curl http://192.168.74.130:18765/api/integrations
 curl http://192.168.74.130:18765/api/notifications
 systemctl --user status uperfect.service
+systemctl --user status uperfect-worker.service
 ```
 
 The local AI status is configured only when `zCoder:latest` is visible from

@@ -26,7 +26,7 @@ is used.
 | --- | --- | --- |
 | `app/main.py` | FastAPI factory, database initialization, service wiring, static PWA routes | Local runtime |
 | `app/config.py` | Environment-only configuration with secret-safe representation | Local tests |
-| `app/database.py` | SQLite schema, transaction boundary, exact currency binding | Local runtime |
+| `app/database.py` | SQLite schema, migration hook, transaction boundary, exact currency binding | Local runtime |
 | `app/schemas.py` | Domain values, stable errors, integration/order DTOs | Unit/API tests |
 | `app/seed.py` | U.Perfect merchant-provided catalog facts and aliases | Catalog tests |
 | `app/repositories.py` | SQLite persistence, idempotency, inventory, audit, outbox | Domain tests |
@@ -38,7 +38,13 @@ is used.
 | `app/services/integrations.py` | Provider status truth and webhook deduplication boundary | Verified locally |
 | `app/services/settings.py` | Persisted workspace preferences and Autobot policy provider | Verified locally |
 | `app/services/notifications.py` | Retryable LINE notification outbox | Verified locally |
+| `app/migrations.py` | Additive SQLite schema version runner through v2 | Migration tests |
+| `app/services/line.py` | Server-only LINE push transport with masked failure messages | Worker tests |
+| `app/services/webhook_auth.py` | Provider-specific HMAC verification over raw request bytes | Security tests |
+| `app/worker.py` | Separate leased notification polling worker | Worker tests |
+| `migrations/002_notification_outbox_retry.sql` | PostgreSQL parity for outbox lease/retry columns | Schema review |
 | `deploy/systemd/uperfect.service` | LAN binding and local Ollama environment | Active service |
+| `deploy/systemd/uperfect-worker.service` | Separate notification worker unit | Static contract test |
 | `deploy/Dockerfile` | Non-root Python 3.12 container template | Static contract test |
 | `deploy/docker-compose.yml` | Local-only Compose template with SQLite volume and health check | Compose config validated |
 | `deploy/nginx/uperfect.conf.example` | Optional `uperfect.zeaz.dev` reverse-proxy template | Static contract test |
@@ -66,7 +72,7 @@ is used.
 | `.github/workflows/ci.yml` | Compile, pytest, and whitespace checks on push/PR | Static contract test |
 | `docs/DEPLOYMENT.md` | Local service, Cloudflare/Terraform ownership, public-route verification, and rollback boundary | Documentation; infrastructure is managed outside this repo |
 | `scripts/package_release.py` | Unused local packaging helper retained outside runtime deployment | Not executed; ZIP export canceled |
-| `tests/` | Unit, API, integration, PWA, and package regression coverage | `pytest -q` |
+| `tests/` | Unit, API, integration, migration, worker, frontend-contract, E2E, PWA, and package regression coverage | `pytest -q` |
 | `tests/test_asset_manifest.py` and `tests/test_ci_and_deploy.py` | Canonical asset and deployment contract coverage | Focused tests |
 | `export-manifest.json` | Original TikTok public retrieval boundary | CAPTCHA status recorded |
 
@@ -112,10 +118,12 @@ approval workbooks record only non-secret identifiers and redacted evidence.
 - Human takeover prevents an automated outbound reply for the active session.
 - Payment evidence moves an order to `pending_review`; only an authorized
   transition can move it to `confirmed` and then `fulfilled`.
-- Facebook, TikTok Shop, and Shopee webhooks require adapter verification and
-  event idempotency. Credentials never enter the browser or generated artifacts.
-- Confirmed orders create a retryable LINE outbox event. Delivery remains
-  visible when LINE is unconfigured or transport fails.
+- Facebook, LINE, TikTok Shop, and Shopee normalized webhooks require
+  provider-specific HMAC over the exact raw body and event idempotency.
+  Credentials never enter the browser or generated artifacts.
+- Confirmed orders create a retryable LINE outbox event. A separate worker claims
+  it with a lease and bounded backoff; delivery remains visible when LINE is
+  unconfigured or transport fails.
 - n8n post/comment/schedule and Auto Update views are present as explicit
   deployment-gated workflows, not fabricated live automation.
 - The no-cost local profile does not enable Gemini, LINE inbound, n8n, Facebook,
@@ -133,16 +141,16 @@ Run from the project root:
 
 ```bash
 .venv/bin/python -m pytest -q
-.venv/bin/python -m compileall -q app scripts
+.venv/bin/python -m compileall -q app scripts tests
 node --check web/app.js
 .venv/bin/python -m pytest -q tests/test_ci_and_deploy.py
 docker compose -f deploy/docker-compose.yml config
 git diff --check
 ```
 
-Local tests establish the product-memory, conversation, order, PWA, webhook
-boundary, settings persistence, Autobot policy, sales asset validation, and
-packaging-helper behavior.
+Local tests establish the product-memory, conversation, order, PWA, migration,
+leased worker, signed webhook boundary, API-path E2E, settings persistence,
+Autobot policy, and sales asset behavior.
 The live LAN smoke check establishes `local_ai=configured`; public
 `https://uperfect.zeaz.dev` also returns the same status through Cloudflare.
 Live channel delivery, LINE delivery, payment verification, n8n execution, and

@@ -36,8 +36,13 @@ Open <http://192.168.74.130:18765/>. The default database is `uperfect.db`;
 set `UPERFECT_DATABASE_PATH` for another location. Copy `.env.example` to a
 deployment-only environment source and fill values outside this repository.
 
-For a persistent local service, install `deploy/systemd/uperfect.service` as a
-user unit and enable it with `systemctl --user enable --now uperfect.service`.
+For a persistent local service, install `deploy/systemd/uperfect.service` and
+`deploy/systemd/uperfect-worker.service` as user units and enable both with:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now uperfect.service uperfect-worker.service
+```
 
 ## Local capabilities
 
@@ -48,7 +53,10 @@ user unit and enable it with `systemctl --user enable --now uperfect.service`.
 - Safe closing: price and promotion replies are bound to catalog facts;
   payment evidence remains `pending_review` until an authorized reviewer acts.
 - Orders: inventory reservation, promotion totals, explicit status transitions,
-  audit events, and a LINE notification outbox.
+  audit events, and a leased LINE notification outbox delivered by the separate
+  worker when LINE is configured.
+- Persistence: additive SQLite schema migrations are recorded in
+  `schema_migrations`; the PostgreSQL parity migration is under `migrations/`.
 - Skills and Agents: visible runtime scopes for memory, safe closing, takeover,
   LINE, and n8n content workflows.
 - Settings: server-persisted store profile, TH/EN default language, timezone,
@@ -89,9 +97,10 @@ Facebook Messenger, TikTok Shop, Shopee, LINE Messaging API, n8n, payment
 verification, and Gemini remain deployment gates because no official
 credentials or local service were supplied. The local Ollama connector is the
 only configured AI provider and is restricted to `192.168.74.130`. The browser
-never receives credential values. A webhook must pass the server-side adapter
-verification boundary before it can create a conversation event; duplicate
-event IDs are ignored.
+never receives credential values. The normalized webhook boundary requires a
+provider-specific HMAC over the exact raw body; raw provider adapters must
+validate their own signatures/state before normalization, and duplicate event
+IDs are ignored.
 
 The response pack is friendly and sales-oriented, but it remains fact-bound:
 unpriced products stay in admin review, sensitive-skin replies include patch-test
@@ -105,8 +114,9 @@ not as proof of an active API connection.
 
 ```bash
 .venv/bin/python -m pytest -q
-.venv/bin/python -m compileall -q app scripts
+.venv/bin/python -m compileall -q app scripts tests
 node --check web/app.js
+docker compose -f deploy/docker-compose.yml config
 ```
 
 GitHub Actions repeats the compile, test, and whitespace checks from

@@ -44,10 +44,20 @@ requires a valid state transition and an actor.
 `customer_id`, and `text`. Trusted local tests must include:
 
 ```text
-X-UPerfect-Webhook-Verified: true
+Facebook: X-Hub-Signature-256: sha256=<HMAC-SHA256 hex>
+LINE: X-Line-Signature: <base64 HMAC-SHA256>
+TikTok/Shopee normalized boundary: X-UPerfect-Webhook-Signature: sha256=<hex>
 ```
 
-This is not a raw Facebook, TikTok, Shopee, or LINE adapter.
+The HMAC covers the exact UTF-8 request body and uses the server-only provider
+secret. Missing or invalid signatures return HTTP 401 with
+`WEBHOOK_SIGNATURE_INVALID`. The endpoint is not a raw Facebook, TikTok,
+Shopee, or LINE adapter; raw provider adapters must verify their own signature,
+state, timestamps, and permissions before normalization.
+
+`GET /api/notifications` exposes only pending/failed event metadata. A confirmed
+order creates an outbox row; `app/worker.py` claims it with a lease and retries
+transport failures when LINE is configured.
 
 ## English
 
@@ -65,7 +75,9 @@ This is not a raw Facebook, TikTok, Shopee, or LINE adapter.
 - `POST /api/orders/{id}/payment-evidence`: submit evidence for review.
 - `POST /api/orders/{id}/transition`: perform a guarded status transition.
 - `GET /api/settings` and `PATCH /api/settings`: safe preferences only.
-- `POST /api/webhooks/{provider}`: normalized trusted local test boundary.
+- `GET /api/notifications`: pending/failed outbox metadata without message
+  credentials.
+- `POST /api/webhooks/{provider}`: signed normalized local test boundary.
 
 Provider raw payloads must not call the normalized route until an adapter has
 validated provider-specific signatures, state, timestamps, and permissions.

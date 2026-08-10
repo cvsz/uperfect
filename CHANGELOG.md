@@ -4,6 +4,13 @@
 
 ### Added / เพิ่ม
 
+- additive SQLite schema migration metadata and PostgreSQL outbox parity migration
+- leased notification outbox delivery worker with bounded retry/backoff and
+  server-only LINE push transport
+- provider-specific HMAC verification over raw normalized webhook bodies for
+  Facebook, LINE, TikTok, and Shopee boundaries
+- API-path E2E order/outbox tests, frontend API/i18n contract tests, and worker
+  deployment units for systemd and Compose
 - validated bilingual TH/EN sales response asset pack
 - local product asset manifest and `/api/sales-assets`
 - bilingual provider onboarding for Facebook, TikTok Shop, Shopee, and LINE
@@ -24,11 +31,13 @@
 - payment confirmation remains an authorized review action
 - human takeover pauses automated replies
 - provider credentials remain server-side
+- webhook signatures are verified server-side; the removed boolean test header
+  is not accepted
 - ZIP export is canceled; no archive is generated or published
 
 ### Not claimed / สิ่งที่ยังไม่อ้างว่าเสร็จ
 
 - live Facebook, TikTok Shop, Shopee, LINE inbound, n8n, or Gemini delivery
-- raw provider adapter signature validation
+- live raw provider adapters and provider portal verification
 - payment slip verification by an external service
 - TikTok public media export when CAPTCHA blocks access

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from uuid import uuid4
 
 from app.repositories import Repository
 from app.schemas import DeliverySummary
@@ -18,10 +19,14 @@ class NotificationService:
     def enqueue(self, destination: str, body: str, event_type: str = "generic") -> str:
         return self.repository.add_notification(event_type, destination, body)
 
-    def deliver_pending(self, sender: NotificationSender) -> DeliverySummary:
+    def deliver_pending(self, sender: NotificationSender, *, worker_id: str | None = None) -> DeliverySummary:
         sent = 0
         failed = 0
-        for event in self.repository.pending_notifications(limit=20):
+        worker_id = worker_id or f"inline-{uuid4()}"
+        while sent + failed < 20:
+            event = self.repository.claim_next_notification(worker_id)
+            if event is None:
+                break
             try:
                 sender(event["destination"], event["body"])
             except Exception as error:  # noqa: BLE001 - failure must remain retryable

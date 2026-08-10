@@ -23,7 +23,8 @@ payment QR data, or credential files in this form.
 - U.Perfect local runtime: `http://192.168.74.130:18765`
 - Local AI: `http://192.168.74.130:11434` with `zCoder:latest`
 - Initial provider state: `unconfigured`
-- `POST /api/webhooks/{provider}` is a normalized local test boundary only.
+- `POST /api/webhooks/{provider}` is a normalized local test boundary protected
+  by HMAC over the raw body.
 - Do not use `192.168.74.130` as an external provider callback/webhook. It is a
   private LAN address; an external provider needs a public HTTPS adapter with a
   trusted certificate and provider-signature verification.
@@ -74,8 +75,8 @@ payment QR data, or credential files in this form.
 | Raw payload retention policy | <!-- retention/deletion rule --> |
 
 The current `POST /api/webhooks/{provider}` endpoint accepts only a normalized
-test payload with `X-UPerfect-Webhook-Verified: true` from a server-side test.
-Do not send raw provider payloads to this route.
+test payload with the provider-specific HMAC header from a server-side test. Do
+not send raw provider payloads to this route.
 
 <a id="facebook-messenger-meta"></a>
 ## 3. Facebook Messenger / Meta
@@ -314,7 +315,7 @@ Do not send raw provider payloads to this route.
 | --- | --- | --- |
 | Channel access token | `LINE_CHANNEL_ACCESS_TOKEN` | outbound outbox after owner setup |
 | Admin destination | `LINE_ADMIN_DESTINATION` | outbound outbox |
-| Channel secret | future server setting | required for inbound adapter |
+| Channel secret | `LINE_CHANNEL_SECRET` | HMAC for inbound boundary; server-only |
 
 This release does not enable inbound LINE chatbot delivery and does not claim
 that LINE sends are live until the token, destination, sender transport, and

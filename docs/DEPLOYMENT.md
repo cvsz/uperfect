@@ -9,13 +9,20 @@ Runtime หลักเป็น FastAPI + PWA แบบ local-only ที่ bi
 `zCoder:latest` เท่านั้นเมื่อ model พร้อมใช้งาน
 
 ```bash
-systemctl --user enable --now uperfect.service
+systemctl --user daemon-reload
+systemctl --user enable --now uperfect.service uperfect-worker.service
 systemctl --user status uperfect.service
+systemctl --user status uperfect-worker.service
 curl -fsS http://192.168.74.130:18765/api/health
 ```
 
-ไฟล์ unit อยู่ที่ `deploy/systemd/uperfect.service` และต้องตรวจ owner/process
-ก่อน restart ทุกครั้ง
+ไฟล์ unit อยู่ที่ `deploy/systemd/uperfect.service` และ
+`deploy/systemd/uperfect-worker.service`; ต้องตรวจ owner/process ก่อน restart
+ทุกครั้ง
+
+worker ใช้ database เดียวกับ API, claim notification ด้วย lease และ retry
+failure แบบ bounded backoff. ถ้าไม่มี `LINE_CHANNEL_ACCESS_TOKEN` หรือ
+`LINE_ADMIN_DESTINATION` จะไม่ทำ network call และคง event ไว้ใน outbox
 
 แม่แบบเพิ่มเติมอยู่ที่ `deploy/README.md`, `deploy/Dockerfile`,
 `deploy/docker-compose.yml` และ `deploy/nginx/uperfect.conf.example` โดย Compose
@@ -65,13 +72,19 @@ The application is a local-only FastAPI + PWA runtime bound to
 `192.168.74.130:11434`, using `zCoder:latest` only when that model is available.
 
 ```bash
-systemctl --user enable --now uperfect.service
+systemctl --user daemon-reload
+systemctl --user enable --now uperfect.service uperfect-worker.service
 systemctl --user status uperfect.service
+systemctl --user status uperfect-worker.service
 curl -fsS http://192.168.74.130:18765/api/health
 ```
 
-The unit file is `deploy/systemd/uperfect.service`. Identify the owning unit and
-process before restarting anything.
+The units are `deploy/systemd/uperfect.service` and
+`deploy/systemd/uperfect-worker.service`. Identify the owning unit and process
+before restarting anything. The worker shares the database, claims notifications
+with a lease, and retries with bounded backoff. Without both
+`LINE_CHANNEL_ACCESS_TOKEN` and `LINE_ADMIN_DESTINATION`, it makes no network
+call and leaves events in the outbox.
 
 Additional templates are in `deploy/README.md`, `deploy/Dockerfile`,
 `deploy/docker-compose.yml`, and `deploy/nginx/uperfect.conf.example`. Compose
@@ -82,7 +95,9 @@ Use `docs/integrations/API_ONBOARDING_EN.md` and
 `docs/integrations/PROVIDER-APPROVAL-FORM_EN.md` for provider access and owner
 evidence. Provider callbacks/webhooks must not point directly to
 `192.168.74.130`; use a public HTTPS adapter with server-side signature/state
-validation before forwarding events to the local service.
+validation before forwarding events to the local service. The normalized local
+route also requires provider-specific HMAC over the exact raw body; it is not a
+replacement for the public adapter.
 
 ### Public route
 

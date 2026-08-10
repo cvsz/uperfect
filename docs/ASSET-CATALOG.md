@@ -7,8 +7,9 @@
 
 ### Canonical asset directories
 
-- `assets/loe_vit_c_aura_serum/` และ `assets/loe_vit_c_aura_body_serum/` เก็บ
-  media ของ Loe VIT C ตาม source ที่มีอยู่
+- `assets/loe_vit_c_aura_serum/` เป็น directory เดียวของ media Loe VIT C ทั้งหมด
+  โดยแยก technical dossier กับ `Loe_Vit_C_Aura_Serum_Promo_TH.md` และ
+  `Loe_Vit_C_Aura_Serum_Promo_EN.md` ตาม source ที่มีอยู่
 - `assets/loe_soap/` เก็บภาพอ้างอิงและเอกสาร TH/EN ของ `LOE_CHARCOAL_SOAP`
 - `assets/suea_rong_hai_mala_chili_oil/` เก็บภาพและเอกสาร TH/EN ของ
   `MALA_CHILI_OIL`
@@ -42,8 +43,9 @@ the bilingual Autobot intents, objections, selling points, and closing CTAs.
 
 ### Canonical asset directories
 
-- `assets/loe_vit_c_aura_serum/` and `assets/loe_vit_c_aura_body_serum/` contain
-  the available Loe VIT C source media.
+- `assets/loe_vit_c_aura_serum/` is the single canonical directory for all Loe
+  VIT C source media. The shorter source dossier is named
+  `Loe_Vit_C_Aura_Serum_Promo_TH.md` / `..._EN.md`.
 - `assets/loe_soap/` contains the TH/EN reference documents and image for
   `LOE_CHARCOAL_SOAP`.
 - `assets/suea_rong_hai_mala_chili_oil/` contains the TH/EN documents and

@@ -20,6 +20,7 @@ should start.
 
 - [Architecture / สถาปัตยกรรม](docs/ARCHITECTURE.md)
 - [API contract / สัญญา API](docs/API.md)
+- [Schema migrations](migrations/002_notification_outbox_retry.sql)
 - [Dashboard i18n / ระบบสองภาษา](docs/I18N.md)
 - [Operations / ปฏิบัติการ](docs/OPERATIONS.md)
 - [Deployment / การ deploy](docs/DEPLOYMENT.md)
@@ -49,6 +50,10 @@ should start.
 ## Release truth / สถานะ release
 
 - Local FastAPI + PWA: runnable and tested.
+- Notification worker: separate local process with leased outbox delivery and
+  retry/backoff; dormant until LINE server configuration exists.
+- SQLite migration metadata: `schema_migrations` version 2 is additive and
+  rerunnable; PostgreSQL parity is in `migrations/`.
 - CI workflow: compile, pytest, and whitespace checks are defined.
 - Docker Compose/Nginx: templates exist; systemd remains the current local
   runtime owner.
@@ -58,15 +63,18 @@ should start.
 - Local AI: only configured when Ollama at `192.168.74.130:11434` exposes
   `zCoder:latest`.
 - Facebook, TikTok Shop, Shopee, LINE, n8n, and Gemini: deployment gates until
-  account-owner credentials and official verification exist.
+  account-owner credentials and official verification exist. The normalized
+  webhook route requires provider-specific HMAC but is not a live provider
+  adapter.
 - ZIP export: canceled; no archive is generated or published.
 
 ## Evidence commands / คำสั่งหลักฐาน
 
 ```bash
 .venv/bin/python -m pytest -q
-.venv/bin/python -m compileall -q app scripts
+.venv/bin/python -m compileall -q app scripts tests
 node --check web/app.js
+docker compose -f deploy/docker-compose.yml config
 curl http://192.168.74.130:18765/api/health
 curl http://192.168.74.130:18765/api/integrations
 ```

@@ -86,10 +86,10 @@ screenshots, or commits:
 ### U.Perfect gate
 
 The current local test route is `POST /api/webhooks/facebook`. It accepts a
-normalized test payload such as `event_id`, `customer_id`, and `text` only with
-the test header. This is not a raw Meta adapter and does not claim to validate
-Meta-specific signatures. Build and verify that server-side adapter before
-accepting real Meta traffic.
+normalized payload such as `event_id`, `customer_id`, and `text` only with
+`X-Hub-Signature-256: sha256=<hex>` over the raw body using
+`FACEBOOK_APP_SECRET`. This is not a raw Meta adapter; build and verify that
+server-side adapter before accepting real Meta traffic.
 
 <a id="tiktok-shop-open-platform"></a>
 ## 3. TikTok Shop Open Platform
@@ -162,8 +162,9 @@ frontend.
 ### U.Perfect gate
 
 `POST /api/webhooks/tiktok` is currently a normalized local test boundary. It
-requires `X-UPerfect-Webhook-Verified: true` and an `event_id` for idempotency.
-Do not connect raw TikTok webhook payloads directly to this route.
+requires `X-UPerfect-Webhook-Signature: sha256=<hex>` over the raw body using
+`TIKTOK_WEBHOOK_SECRET` and an `event_id` for idempotency. Do not connect raw
+TikTok webhook payloads directly to this route.
 
 <a id="shopee-open-platform"></a>
 ## 4. Shopee Open Platform
@@ -215,9 +216,10 @@ setup.
 
 ### U.Perfect gate
 
-`POST /api/webhooks/shopee` is a normalized local test boundary. It requires the
-test header and event idempotency. The release does not claim that a Shopee
-chat/order adapter is production-ready.
+`POST /api/webhooks/shopee` is a normalized local test boundary. It requires
+`X-UPerfect-Webhook-Signature: sha256=<hex>` over the raw body using
+`SHOPEE_WEBHOOK_SECRET` and event idempotency. The release does not claim that a
+Shopee chat/order adapter is production-ready.
 
 <a id="line-messaging-api"></a>
 ## 5. LINE Messaging API
@@ -231,9 +233,10 @@ chat/order adapter is production-ready.
 ### Current release scope
 
 U.Perfect contains a retryable notification outbox for confirmed-order events
-to LINE. It does not currently expose an inbound LINE chatbot route. Do not use
-`LINE_CHANNEL_ACCESS_TOKEN` for automated customer replies until a LINE adapter
-with webhook signature validation is implemented.
+to LINE and a normalized inbound boundary that verifies `X-Line-Signature` over
+the raw body with `LINE_CHANNEL_SECRET`. It does not claim a production inbound
+LINE chatbot adapter. Do not use `LINE_CHANNEL_ACCESS_TOKEN` for automated
+customer replies until the official adapter and account verification are ready.
 
 ### LINE Developers July 2026 compatibility note
 
@@ -280,7 +283,7 @@ before enabling a new LINE product or transport.
 | --- | --- | --- |
 | Channel access token | `LINE_CHANNEL_ACCESS_TOKEN` | outbox when owner configures it |
 | Admin destination | `LINE_ADMIN_DESTINATION` | outbox |
-| Channel secret | future server setting | required for inbound webhook |
+| Channel secret | `LINE_CHANNEL_SECRET` | HMAC for normalized/inbound boundary; server-only |
 
 ## 6. Verification after setup
 

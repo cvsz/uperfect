@@ -11,7 +11,14 @@ from app.main import create_app
 
 @pytest.fixture()
 def settings(tmp_path: Path) -> Settings:
-    return Settings(database_path=str(tmp_path / "test.db"), line_channel_access_token=None)
+    return Settings(
+        database_path=str(tmp_path / "test.db"),
+        line_channel_access_token=None,
+        line_channel_secret="line-secret",
+        facebook_app_secret="facebook-secret",
+        tiktok_webhook_secret="tiktok-secret",
+        shopee_webhook_secret="shopee-secret",
+    )
 
 
 @pytest.fixture()

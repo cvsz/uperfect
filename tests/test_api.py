@@ -1,5 +1,16 @@
+import hashlib
+import hmac
+import json
+
 from app.config import Settings
 from app.main import create_app
+
+
+def signed_json(payload: dict[str, str], secret: str, *, encoding: str = "hex") -> tuple[bytes, str]:
+    body = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    digest = hmac.new(secret.encode("utf-8"), body, hashlib.sha256)
+    signature = digest.hexdigest() if encoding == "hex" else __import__("base64").b64encode(digest.digest()).decode("ascii")
+    return body, signature
 
 
 def test_settings_do_not_expose_secret_values(monkeypatch):
@@ -154,15 +165,16 @@ def test_unverified_webhook_has_explicit_error(client):
     )
 
     assert response.status_code == 401
-    assert response.json()["error"]["code"] == "WEBHOOK_NOT_VERIFIED"
+    assert response.json()["error"]["code"] == "WEBHOOK_SIGNATURE_INVALID"
 
 
 def test_verified_webhook_is_idempotent(client):
     payload = {"event_id": "e-2", "customer_id": "buyer-3", "text": "สนใจวิตซีโลเอ้"}
-    headers = {"X-UPerfect-Webhook-Verified": "true"}
+    body, signature = signed_json(payload, "facebook-secret")
+    headers = {"Content-Type": "application/json", "X-Hub-Signature-256": f"sha256={signature}"}
 
-    first = client.post("/api/webhooks/facebook", json=payload, headers=headers)
-    second = client.post("/api/webhooks/facebook", json=payload, headers=headers)
+    first = client.post("/api/webhooks/facebook", content=body, headers=headers)
+    second = client.post("/api/webhooks/facebook", content=body, headers=headers)
 
     assert first.status_code == 200
     assert first.json()["duplicate"] is False

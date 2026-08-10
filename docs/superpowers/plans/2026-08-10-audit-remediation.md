@@ -1,5 +1,8 @@
 # U.Perfect Audit Remediation Implementation Plan
 
+> Historical implementation plan. The final canonical asset path and runtime
+> hardening are recorded in `2026-08-10-scrutinize-hardening.md`.
+
 > For agentic workers: REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox syntax for tracking.
 
 **Goal:** Close the audited test, asset, CI, and deployment gaps while preserving the local-only U.Perfect runtime and fact-bound catalog.

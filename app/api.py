@@ -5,10 +5,10 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any, Literal
 
-from fastapi import APIRouter, Header, Query, Request
+from fastapi import APIRouter, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.schemas import InboundMessage, Product, WebhookEvent, decimal_json
+from app.schemas import InboundMessage, IntegrationError, Product, WebhookEvent, decimal_json
 from app.services.sales_assets import public_sales_assets
 
 
@@ -453,12 +453,22 @@ def workflows(request: Request) -> dict[str, Any]:
 
 
 @router.post("/webhooks/{provider}")
-def accept_webhook(
+async def accept_webhook(
     provider: str,
     payload: dict[str, Any],
     request: Request,
-    x_uperfect_webhook_verified: str | None = Header(default=None),
 ) -> dict[str, Any]:
+    integrations = _services(request).integrations
+    if not integrations.verify_request(provider, await request.body(), request.headers):
+        if provider.casefold().strip() not in {"facebook", "line", "tiktok", "shopee"}:
+            return integrations.accept(
+                WebhookEvent(provider=provider, event_id="", customer_id="", text="", verified=False)
+            )
+        raise IntegrationError(
+            "webhook signature is missing or invalid",
+            code="WEBHOOK_SIGNATURE_INVALID",
+            http_status=401,
+        )
     event_id = str(payload.get("event_id") or payload.get("id") or "").strip()
     customer_id = str(payload.get("customer_id") or payload.get("sender_id") or "").strip()
     text = str(payload.get("text") or payload.get("message") or "").strip()
@@ -467,9 +477,9 @@ def accept_webhook(
         event_id=event_id,
         customer_id=customer_id,
         text=text,
-        verified=x_uperfect_webhook_verified == "true",
+        verified=True,
     )
-    receipt = _services(request).integrations.accept(event)
+    receipt = integrations.accept(event)
     return {
         "accepted": receipt.accepted,
         "duplicate": receipt.duplicate,

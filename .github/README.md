@@ -37,7 +37,7 @@ Never attach tokens, keys, PINs, passphrases, `.env` files, or real databases.
 ## CI / ตรวจอัตโนมัติ
 
 The workflow at `.github/workflows/ci.yml` runs on pushes and pull requests. It
-installs `requirements-dev.txt`, compiles `app` and `scripts`, runs the full
-pytest suite, and checks `git diff --check`. A green workflow proves repository
-checks only; it does not prove provider approval, public routing, or live
-channel delivery.
+installs `requirements-dev.txt`, compiles `app`, `scripts`, and `tests`, runs the
+full pytest suite, and checks `git diff --check`. A green workflow proves
+repository checks only; it does not prove provider approval, public routing, or
+live channel delivery.

@@ -137,7 +137,15 @@ CREATE TABLE IF NOT EXISTS notification_outbox (
   attempts INTEGER NOT NULL DEFAULT 0,
   last_error TEXT,
   created_at TIMESTAMPTZ NOT NULL,
-  sent_at TIMESTAMPTZ
+  sent_at TIMESTAMPTZ,
+  locked_until TIMESTAMPTZ,
+  locked_by TEXT,
+  next_attempt_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  version INTEGER PRIMARY KEY,
+  applied_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS audit_events (
