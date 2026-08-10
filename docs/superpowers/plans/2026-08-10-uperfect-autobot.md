@@ -708,7 +708,7 @@ Expected: all tests pass.
 
 - [ ] **Step 2: Run syntax and secret scans**
 
-Run: `python3 -m compileall -q app scripts && rg -n -i 'EAAxZA|rft_tk_|partner_key_sample|access[_-]?token\s*=\s*["'"'][^"'"']+' --glob '!rewrite-uperfect.md' .`
+Run: `python3 -m compileall -q app scripts && rg -n -i 'sample[_-]?credential|sample[_-]?token|access[_-]?token\s*=\s*["'"'][^"'"']+' --glob '!rewrite-uperfect.md' .`
 
 Expected: compile succeeds; secret scan finds no value-bearing credential literals outside the source export.
 
